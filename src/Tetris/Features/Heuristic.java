@@ -19,11 +19,8 @@ public class Heuristic {
     UnevennessFeature unevennessFeature;
 
 
-    //the State that we want to use our Heuristic function to evaluate
-    State state;
 
-    public Heuristic(double averageHeightValue, double maxHeightValue, double numOfHolesValue, double unEvennessValue,
-                     State state) {
+    public Heuristic(double averageHeightWeight, double maxHeightValue, double numOfHolesValue, double unEvennessValue) {
 
         this.averageHeightValue = averageHeightValue;
         this.averageHeightFeature = new AverageHeightFeature();
@@ -37,10 +34,9 @@ public class Heuristic {
         this.unEvennessValue = unEvennessValue;
         this.unevennessFeature = new UnevennessFeature();
 
-        this.state = state;
     }
 
-    public double getValue() {
+    public double getValue(State state) {
         double sum = 0;
         sum = averageHeightValue * averageHeightFeature.getValue(state)
             + maxHeightValue * maxHeightFeature.getValue(state)
