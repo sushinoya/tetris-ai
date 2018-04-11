@@ -1,20 +1,65 @@
 package Tetris;
 
-import Tetris.Features.Feature;
-import Tetris.Features.Heuristic;
-
 import java.util.*;
+
+import Tetris.Util.Tuple;
+import Tetris.Util.Util;
 
 public class PlayerSkeleton {
 
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves) {
-		
 		return 0;
 	}
-	
-	public static void main(String[] args) {
 
+	public static void main(String[] args) {
+		geneticFunction();
+	}
+
+	// Simulates the replacement of the population by its member's descendants
+	public static void geneticFunction() {
+		ArrayList<Heuristic> population = Util.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
+
+		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
+			HashMap<Heuristic, Integer> averageScores = getPopulationScores(population);
+			population = generateNextGeneration(averageScores);
+		}
+	}
+
+
+	// Creates NUMBER_OF_HEURISTICS new children from the current population and returns this new population.
+	// The probability of two heuristics procreating is proportional to the average score they generated.
+	public static ArrayList<Heuristic> generateNextGeneration(HashMap<Heuristic, Integer> population) {
+		ArrayList<Heuristic> newPopulation = new ArrayList<Heuristic>();
+
+		for (int i = 0; i < population.size(); i++) {
+			Tuple<Heuristic, Integer> mother = randomSelect(population);
+			Tuple<Heuristic, Integer> father = randomSelect(population);
+			Heuristic child = reproduce(mother, father);
+
+			// Add lines to mimic random mutation
+			newPopulation.add(child);
+		}
+
+		return newPopulation;
+	}
+
+
+	public static HashMap<Heuristic, Integer> getPopulationScores(ArrayList<Heuristic> population) {
+		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
+
+		// Run every heuristic NUMBER_OF_GAMES times and store the average score
+		for (Heuristic heuristic : population) {
+			Integer averageScore = 0;
+			for (int i = 0; i < Constants.NUMBER_OF_GAMES; i++) {
+				averageScore += runGameWithHeuristic(heuristic);
+			}
+			averageScore /= Constants.NUMBER_OF_GAMES;
+
+			averageScores.put(heuristic, averageScore);
+		}
+
+		return averageScores;
 	}
 
 
@@ -23,9 +68,6 @@ public class PlayerSkeleton {
 		new TFrame(s);
 		PlayerSkeleton p = new PlayerSkeleton();
 		while(!s.hasLost()) {
-			//compare here
-
-
 			s.makeMove(p.pickMove(s,s.legalMoves()));
 			s.draw();
 			s.drawNext(0,0);
@@ -39,70 +81,81 @@ public class PlayerSkeleton {
 		return s.getRowsCleared();
 	}
 
-	//genetic function takes in an arraylist of Heuristics and outputs the best Heuristic
-	public static Heuristic geneticFunction(ArrayList<Heuristic> population, State state) {
-		for (int j = 0; j < 100; j++) {
-			ArrayList<Heuristic> newPopulation = new ArrayList<Heuristic>();
-			for (int i = 0; i < population.size(); i++) {
-				Heuristic x = randomSelect(population);
-				Heuristic y = randomSelect(population);
-				Heuristic child = reproduce(x, y);
-
-
-				// if some shit, then mutate child
-
-				newPopulation.add(child);
-			}
-
-			population = newPopulation;
-
-		}
-	}
 
 
 	//ideas from https://softwareengineering.stackexchange.com/questions/150616/return-random-list-item-by-its-weight
-	public static ArrayList<Double> generateProbability(ArrayList<Heuristic> population) {
-		ArrayList<Double> intervalList = new ArrayList<>(population.size());
-		intervalList.set(0, population.get(0).getValue(state));
-		for (int k = 1; k < population.size(); k ++) {
-			intervalList.set(k, intervalList.get(k - 1) + population.get(k).getValue(state));
+	public static Tuple<ArrayList<Heuristic>, ArrayList<Integer>> generateProbabilityIntervalList(HashMap<Heuristic, Integer> populationWithScores) {
+
+		ArrayList<Heuristic> heuristicsList = new ArrayList<Heuristic>(populationWithScores.keySet());
+		ArrayList<Integer> intervalList = new ArrayList<Integer>(heuristicsList.size());
+
+		intervalList.set(0, populationWithScores.get(heuristicsList.get(0)));
+		for (int k = 1; k < heuristicsList.size(); k ++) {
+			intervalList.set(k, intervalList.get(k - 1) + populationWithScores.get(heuristicsList.get(k)));
 		}
-		return intervalList;
+		return new Tuple<>(heuristicsList, intervalList);
 	}
 
-	public static Heuristic randomSelect(ArrayList<Heuristic> population) {
-		double sumWeights = 0;
-		for (int i = 0; i < population.size(); i ++) {
-			sumWeights += population.get(i).getValue(state);
-		}
+	public static Tuple<Heuristic, Integer> randomSelect(HashMap<Heuristic, Integer> populationWithScores) {
+		double sumOfScores = Util.sum(populationWithScores.values());
+
+		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
+
+		ArrayList<Heuristic> heuristicsList= heuristicsAndIntervals.getFirst();
+		ArrayList<Integer> intervalsList= heuristicsAndIntervals.getSecond();
+
 
 		Random rand = new Random();
-		Double randomDouble = rand.nextDouble(); //this method generates a random number between 0.0 to 1.0
-		randomDouble = randomDouble * sumWeights;
+		Double randomDouble = rand.nextDouble();
+		randomDouble = randomDouble * sumOfScores;
 
-		ArrayList<Double> probabilityInterval = generateProbability(population);
-		int k;
-		for (k = 0; k < probabilityInterval.size(); k++) {
-			if (randomDouble - 1 < probabilityInterval.get(k)) {
+		int chosenIndex;
+
+		for (chosenIndex = 0; chosenIndex < intervalsList.size(); chosenIndex++) {
+			if (randomDouble - 1 < intervalsList.get(chosenIndex)) {
 				break;
 			}
 		}
 
-		return population.get(k);
+
+		Heuristic chosenHeuristic = heuristicsList.get(chosenIndex);
+		Integer chosenHeuristicScore = populationWithScores.get(chosenHeuristic);
+
+		return new Tuple<>(chosenHeuristic, chosenHeuristicScore);
 	}
 
 
-	//takes in 2 Heuristics, and return an offspring. keep in mind that there are 4 features at this point.
-	public static Heuristic reproduce(Heuristic x, Heuristic y) {
-		double totalWeight = x.getValue() + y.getValue();
-		double indexToCut_Double = (x.getValue() / totalWeight) * 4;
-		int indexToCut_int = (int) Math.round(indexToCut_Double);
+	public static Heuristic reproduce(Tuple<Heuristic, Integer> mother, Tuple<Heuristic, Integer> father) {
+		double scoreRatio = mother.getSecond() / father.getSecond();
 
+		int numOfWeightsFromMother = 0;
+		ArrayList<Double> motherWeights = mother.getFirst().weights;
+		ArrayList<Double> fatherWeights = father.getFirst().weights;
 
-		for (int i = 0; i < indexToCut_int; i++) {
-
+		if (scoreRatio < 1/4) {
+			numOfWeightsFromMother = (Constants.NUMBER_OF_FEATURES / 4) + 1;
+		} else if (scoreRatio < 3/4) {
+			numOfWeightsFromMother = Constants.NUMBER_OF_FEATURES / 2;
+		} else {
+			numOfWeightsFromMother = (3 * Constants.NUMBER_OF_FEATURES / 4);
 		}
+
+
+		int[] weightIndexesFromMother = Util.generateRandomIndices(numOfWeightsFromMother, Constants.NUMBER_OF_FEATURES);
+
+
+		double[] childWeights = new double[Constants.NUMBER_OF_FEATURES];
+
+		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
+			if (Arrays.asList(weightIndexesFromMother).contains((i))) {
+				childWeights[i] = motherWeights.get(i);
+			} else {
+				childWeights[i] = fatherWeights.get(i);
+			}
+		}
+
+		childWeights = Util.scaleWeights(childWeights);
+
+		return new Heuristic(childWeights);
 	}
-
-
 }
