@@ -3,23 +3,15 @@ package Tetris;
 import java.awt.Color;
 
 
-
-
 public class State {
 	public static final int COLS = 10;
 	public static final int ROWS = 21;
 	public static final int N_PIECES = 7;
 
-	
-
 	public boolean lost = false;
 	
-	
-	
-
-	
 	public TLabel label;
-	
+
 	//current turn
 	private int turn = 0;
 	private int cleared = 0;
@@ -30,11 +22,8 @@ public class State {
 	//0 means empty
 	private int[] top = new int[COLS];
 	
-	
 	//number of next piece
 	protected int nextPiece;
-	
-	
 	
 	//all legal moves - first index is piece type - then a list of 2-length arrays
 	protected static int[][][] legalMoves = new int[N_PIECES][][];
@@ -312,9 +301,6 @@ public class State {
 		label.line(0, 0, 0, ROWS+5);
 		label.line(COLS, 0, COLS, ROWS+5);
 	}
-	
-
-	
 
 }
 
