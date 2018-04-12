@@ -25,21 +25,16 @@ public class Util {
     }
 
 
+    // This method generates a list of random weights. Thie sum does not add up to Constants.SUM_OF_PROBABILITIES
+    // However, when a Heuristic Object is constructed using these weights, the weights will be automatically adjusted
+    // in the Heuristic constructed to scaled the weights so that they add up to Constants.SUM_OF_PROBABILITIES.
     public static double[] getRandomWeights(int numberOfWeights) {
-        double sum = Constants.SUM_OF_PROBABILITIES;
         double[] weights = new double[numberOfWeights];
 
         Random rand = new Random();
-        double intermediateSum = 0;
 
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = rand.nextInt(Constants.SUM_OF_PROBABILITIES) + 1;
-            intermediateSum += weights[i];
-        }
-
-        for (int i = 0; i < weights.length; i++) {
-            weights[i] /= intermediateSum;
-            weights[i] *= sum;
+            weights[i] = rand.nextDouble();
         }
 
         return weights;

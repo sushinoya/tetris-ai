@@ -1,12 +1,7 @@
 package Tetris;
 
-import Tetris.State;
 import Tetris.Features.*;
 import Tetris.Util.Util;
-import com.sun.javafx.collections.ArrayListenerHelper;
-
-import java.util.ArrayList;
-import java.util.Random;
 
 //this class represents the features and their corresponding weights
 public class Heuristic {
