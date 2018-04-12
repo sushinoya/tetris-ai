@@ -2,7 +2,7 @@ package Tetris.Features;
 
 import Tetris.State;
 
-public class MaxHeightFeature extends Feature{
+public class MaxHeightFeature extends Feature {
 
     @Override
     public double getValue(State state) {
