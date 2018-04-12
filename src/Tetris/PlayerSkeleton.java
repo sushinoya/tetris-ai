@@ -8,9 +8,12 @@ import Tetris.Helper.Helper;
 
 public class PlayerSkeleton {
 
+	public static TFrame frame = new TFrame(new State());
+
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves) {
-		return 0;
+		Random rand = new Random();
+		return rand.nextInt(legalMoves.length);
 	}
 
 	public static void main(String[] args) {
@@ -53,9 +56,13 @@ public class PlayerSkeleton {
 		// Run every heuristic NUMBER_OF_GAMES times and store the average score
 		for (Heuristic heuristic : population) {
 			Integer averageScore = 0;
+
 			for (int i = 0; i < Constants.NUMBER_OF_GAMES; i++) {
 				averageScore += runGameWithHeuristic(heuristic);
 			}
+
+			System.out.println("done with one heuristic");
+
 			averageScore /= Constants.NUMBER_OF_GAMES;
 
 			averageScores.put(heuristic, averageScore);
@@ -65,21 +72,22 @@ public class PlayerSkeleton {
 	}
 
 
+
 	public static int runGameWithHeuristic(Heuristic heuristic) {
 		State s = new State();
-		new TFrame(s);
+		frame.bindState(s);
 		PlayerSkeleton p = new PlayerSkeleton();
 		while(!s.hasLost()) {
 			s.makeMove(p.pickMove(s,s.legalMoves()));
 			s.draw();
 			s.drawNext(0,0);
 			try {
-				Thread.sleep(300);
+				Thread.sleep(3);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("You have completed "+s.getRowsCleared()+" rows.");
+//		System.out.println("You have completed "+s.getRowsCleared()+" rows.");
 		return s.getRowsCleared();
 	}
 
@@ -145,9 +153,6 @@ public class PlayerSkeleton {
 		double[] childWeights = new double[Constants.NUMBER_OF_FEATURES];
 
 		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
-
-			System.out.println(i);
-			System.out.println(Helper.contains(weightIndexesFromMother, i));
 
 			if (Helper.contains(weightIndexesFromMother, i)) {
 				childWeights[i] = motherWeights[i];

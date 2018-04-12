@@ -25,7 +25,7 @@ public class Helper {
     }
 
 
-    // This method generates a list of random weights. Thie sum does not add up to Constants.SUM_OF_PROBABILITIES
+    // This method generates a list of random weights. This sum does not add up to Constants.SUM_OF_PROBABILITIES
     // However, when a Heuristic Object is constructed using these weights, the weights will be automatically adjusted
     // in the Heuristic constructed to scaled the weights so that they add up to Constants.SUM_OF_PROBABILITIES.
     public static double[] getRandomWeights(int numberOfWeights) {
@@ -73,7 +73,6 @@ public class Helper {
 
     // Contains method cause stupid Java couldn't have provided one
     public static boolean contains (int[] arr, int toFind) {
-
         for (int elem: arr) {
             if (elem == toFind) {
                 return true;
