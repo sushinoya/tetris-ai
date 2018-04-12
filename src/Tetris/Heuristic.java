@@ -1,7 +1,7 @@
 package Tetris;
 
 import Tetris.Features.*;
-import Tetris.Util.Util;
+import Tetris.Helper.*;
 
 //this class represents the features and their corresponding weights
 public class Heuristic {
@@ -33,7 +33,7 @@ public class Heuristic {
         weights[2] = numOfHolesWeight;
         weights[3] = unevennessWeight;
 
-        this.weights = Util.scaleWeights(weights);
+        this.weights = Helper.scaleWeights(weights);
 
         this.averageHeightWeight = this.weights[0];
         this.maxHeightWeight = this.weights[1];

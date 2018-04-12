@@ -1,4 +1,4 @@
-package Tetris.Util;
+package Tetris.Helper;
 
 
 public class Tuple<First,Second> {

@@ -3,8 +3,8 @@ package Tetris;
 import java.util.*;
 import java.lang.*;
 
-import Tetris.Util.Tuple;
-import Tetris.Util.Util;
+import Tetris.Helper.Tuple;
+import Tetris.Helper.Helper;
 
 public class PlayerSkeleton {
 
@@ -19,7 +19,7 @@ public class PlayerSkeleton {
 
 	// Simulates the replacement of the population by its member's descendants
 	public static void geneticFunction() {
-		ArrayList<Heuristic> population = Util.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
+		ArrayList<Heuristic> population = Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
 
 		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
 			HashMap<Heuristic, Integer> averageScores = getPopulationScores(population);
@@ -97,7 +97,7 @@ public class PlayerSkeleton {
 
 
 	public static Tuple<Heuristic, Integer> randomSelect(HashMap<Heuristic, Integer> populationWithScores) {
-		double sumOfScores = Util.sum(populationWithScores.values());
+		double sumOfScores = Helper.sum(populationWithScores.values());
 
 		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
 
@@ -142,7 +142,7 @@ public class PlayerSkeleton {
 		}
 
 
-		int[] weightIndexesFromMother = Util.generateRandomIndices(numOfWeightsFromMother, Constants.NUMBER_OF_FEATURES);
+		int[] weightIndexesFromMother = Helper.generateRandomIndices(numOfWeightsFromMother, Constants.NUMBER_OF_FEATURES);
 
 
 		double[] childWeights = new double[Constants.NUMBER_OF_FEATURES];
@@ -150,9 +150,9 @@ public class PlayerSkeleton {
 		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
 
 			System.out.println(i);
-			System.out.println(Util.contains(weightIndexesFromMother, i));
+			System.out.println(Helper.contains(weightIndexesFromMother, i));
 
-			if (Util.contains(weightIndexesFromMother, i)) {
+			if (Helper.contains(weightIndexesFromMother, i)) {
 				childWeights[i] = motherWeights[i];
 			} else {
 				childWeights[i] = fatherWeights[i];

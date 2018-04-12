@@ -1,4 +1,4 @@
-package Tetris.Util;
+package Tetris.Helper;
 
 import Tetris.Constants;
 import Tetris.Heuristic;
@@ -6,7 +6,7 @@ import Tetris.Heuristic;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class Util {
+public class Helper {
 
     /* Generates x distinct random integers between 0(inclusive) and y(non-inclusive) */
     public static int[] generateRandomIndices(int x, int y) {
@@ -19,7 +19,7 @@ public class Util {
 
 
     public static double[] scaleWeights(double[] unscaledWeights) {
-        int sum = Util.sum(unscaledWeights);
+        int sum = Helper.sum(unscaledWeights);
         unscaledWeights = Arrays.stream(unscaledWeights).map(s -> s * Constants.SUM_OF_PROBABILITIES / sum).toArray();
         return unscaledWeights;
     }
