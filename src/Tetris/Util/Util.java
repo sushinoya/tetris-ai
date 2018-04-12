@@ -4,17 +4,17 @@ import Tetris.Constants;
 import Tetris.Heuristic;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Util {
 
-    /* Generates x times of a number between 0(inclusive) and y(non-inclusive) */
+    /* Generates x distinct random integers between 0(inclusive) and y(non-inclusive) */
     public static int[] generateRandomIndices(int x, int y) {
-        int[] randomNums = new int[x];
-        Random random = new Random();
-        for (int i = 0; i < x; i++) {
-            randomNums[i] = random.nextInt(y);
+        if (x > y) {
+            return new int[0];
+        } else {
+            return ThreadLocalRandom.current().ints(0, y).distinct().limit(x).toArray();
         }
-        return randomNums;
     }
 
 
@@ -74,6 +74,18 @@ public class Util {
             sum += i;
         }
         return sum;
+    }
+
+    // Contains method cause stupid Java couldn't have provided one
+    public static boolean contains (int[] arr, int toFind) {
+
+        for (int elem: arr) {
+            if (elem == toFind) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

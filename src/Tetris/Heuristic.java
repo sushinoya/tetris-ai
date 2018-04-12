@@ -2,6 +2,7 @@ package Tetris;
 
 import Tetris.State;
 import Tetris.Features.*;
+import Tetris.Util.Util;
 import com.sun.javafx.collections.ArrayListenerHelper;
 
 import java.util.ArrayList;
@@ -10,43 +11,39 @@ import java.util.Random;
 //this class represents the features and their corresponding weights
 public class Heuristic {
 
-    ArrayList<Double> weights;
+    double[] weights;
 
     //these double values represent the weight on each feature
     //the feature represents the features themselves
     double averageHeightWeight;
-    AverageHeightFeature averageHeightFeature;
+    public static AverageHeightFeature averageHeightFeature = new AverageHeightFeature();
 
     double maxHeightWeight;
-    MaxHeightFeature maxHeightFeature;
+    public static MaxHeightFeature maxHeightFeature = new MaxHeightFeature();
 
     double numOfHolesWeight;
-    NumOfHolesFeature numOfHolesFeature;
+    public static NumOfHolesFeature numOfHolesFeature = new NumOfHolesFeature();
 
     double unevennessWeight;
-    UnevennessFeature unevennessFeature;
+    public static UnevennessFeature unevennessFeature = new UnevennessFeature();
 
 
-
+    // Automatically scales the weights such that their sum is Constants.SUM_OF_PROBABILITIES
     public Heuristic(double averageHeightWeight, double maxHeightWeight, double numOfHolesWeight, double unevennessWeight) {
 
-        this.weights = new ArrayList<Double>();
+        double[] weights = new double[Constants.NUMBER_OF_FEATURES];
 
-        this.averageHeightWeight = averageHeightWeight;
-        weights.add(averageHeightWeight);
-        this.averageHeightFeature = new AverageHeightFeature();
+        weights[0] = averageHeightWeight;
+        weights[1] = maxHeightWeight;
+        weights[2] = numOfHolesWeight;
+        weights[3] = unevennessWeight;
 
-        this.maxHeightWeight = maxHeightWeight;
-        weights.add(maxHeightWeight);
-        this.maxHeightFeature = new MaxHeightFeature();
+        this.weights = Util.scaleWeights(weights);
 
-        this.numOfHolesWeight = numOfHolesWeight;
-        weights.add(numOfHolesWeight);
-        this.numOfHolesFeature = new NumOfHolesFeature();
-
-        this.unevennessWeight = unevennessWeight;
-        weights.add(unevennessWeight);
-        this.unevennessFeature = new UnevennessFeature();
+        this.averageHeightWeight = this.weights[0];
+        this.maxHeightWeight = this.weights[1];
+        this.numOfHolesWeight = this.weights[2];
+        this.unevennessWeight = this.weights[3];
 
     }
 

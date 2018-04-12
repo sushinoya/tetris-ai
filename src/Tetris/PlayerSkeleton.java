@@ -1,6 +1,7 @@
 package Tetris;
 
 import java.util.*;
+import java.lang.*;
 
 import Tetris.Util.Tuple;
 import Tetris.Util.Util;
@@ -82,8 +83,6 @@ public class PlayerSkeleton {
 	}
 
 
-
-	//ideas from https://softwareengineering.stackexchange.com/questions/150616/return-random-list-item-by-its-weight
 	public static Tuple<ArrayList<Heuristic>, ArrayList<Integer>> generateProbabilityIntervalList(HashMap<Heuristic, Integer> populationWithScores) {
 
 		ArrayList<Heuristic> heuristicsList = new ArrayList<Heuristic>(populationWithScores.keySet());
@@ -95,6 +94,7 @@ public class PlayerSkeleton {
 		}
 		return new Tuple<>(heuristicsList, intervalList);
 	}
+
 
 	public static Tuple<Heuristic, Integer> randomSelect(HashMap<Heuristic, Integer> populationWithScores) {
 		double sumOfScores = Util.sum(populationWithScores.values());
@@ -125,12 +125,13 @@ public class PlayerSkeleton {
 	}
 
 
+
 	public static Heuristic reproduce(Tuple<Heuristic, Integer> mother, Tuple<Heuristic, Integer> father) {
 		double scoreRatio = mother.getSecond() / father.getSecond();
 
 		int numOfWeightsFromMother = 0;
-		ArrayList<Double> motherWeights = mother.getFirst().weights;
-		ArrayList<Double> fatherWeights = father.getFirst().weights;
+		double[] motherWeights = mother.getFirst().weights;
+		double[] fatherWeights = father.getFirst().weights;
 
 		if (scoreRatio < 1/4) {
 			numOfWeightsFromMother = (Constants.NUMBER_OF_FEATURES / 4) + 1;
@@ -147,14 +148,16 @@ public class PlayerSkeleton {
 		double[] childWeights = new double[Constants.NUMBER_OF_FEATURES];
 
 		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
-			if (Arrays.asList(weightIndexesFromMother).contains((i))) {
-				childWeights[i] = motherWeights.get(i);
+
+			System.out.println(i);
+			System.out.println(Util.contains(weightIndexesFromMother, i));
+
+			if (Util.contains(weightIndexesFromMother, i)) {
+				childWeights[i] = motherWeights[i];
 			} else {
-				childWeights[i] = fatherWeights.get(i);
+				childWeights[i] = fatherWeights[i];
 			}
 		}
-
-		childWeights = Util.scaleWeights(childWeights);
 
 		return new Heuristic(childWeights);
 	}
