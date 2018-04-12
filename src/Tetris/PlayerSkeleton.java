@@ -22,20 +22,21 @@ public class PlayerSkeleton {
 		ArrayList<Heuristic> population = Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
 
 		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
-			HashMap<Heuristic, Integer> averageScores = getPopulationScores(population);
-			population = generateNextGeneration(averageScores);
+			HashMap<Heuristic, Integer> populationWithAverageScores = getPopulationScores(population);
+			population = generateNextGeneration(populationWithAverageScores);
 		}
 	}
 
 
 	// Creates NUMBER_OF_HEURISTICS new children from the current population and returns this new population.
 	// The probability of two heuristics procreating is proportional to the average score they generated.
-	public static ArrayList<Heuristic> generateNextGeneration(HashMap<Heuristic, Integer> population) {
+	public static ArrayList<Heuristic> generateNextGeneration(HashMap<Heuristic, Integer> populationWithScores) {
 		ArrayList<Heuristic> newPopulation = new ArrayList<Heuristic>();
+		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
 
-		for (int i = 0; i < population.size(); i++) {
-			Tuple<Heuristic, Integer> mother = randomSelect(population);
-			Tuple<Heuristic, Integer> father = randomSelect(population);
+		for (int i = 0; i < populationWithScores.size(); i++) {
+			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
+			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Heuristic child = reproduce(mother, father);
 
 			// Add lines to mimic random mutation
@@ -96,14 +97,11 @@ public class PlayerSkeleton {
 	}
 
 
-	public static Tuple<Heuristic, Integer> randomSelect(HashMap<Heuristic, Integer> populationWithScores) {
+	public static Tuple<Heuristic, Integer> randomSelect(HashMap<Heuristic, Integer> populationWithScores, Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals) {
 		double sumOfScores = Helper.sum(populationWithScores.values());
-
-		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
 
 		ArrayList<Heuristic> heuristicsList= heuristicsAndIntervals.getFirst();
 		ArrayList<Integer> intervalsList= heuristicsAndIntervals.getSecond();
-
 
 		Random rand = new Random();
 		Double randomDouble = rand.nextDouble();
@@ -116,7 +114,6 @@ public class PlayerSkeleton {
 				break;
 			}
 		}
-
 
 		Heuristic chosenHeuristic = heuristicsList.get(chosenIndex);
 		Integer chosenHeuristicScore = populationWithScores.get(chosenHeuristic);
