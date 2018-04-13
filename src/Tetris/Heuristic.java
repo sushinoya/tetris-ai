@@ -48,7 +48,7 @@ public class Heuristic {
     }
 
 
-    public double getValue(State state) {
+    public double getValue(PotentialNextState state) {
         double sum = 0;
         sum = averageHeightWeight * averageHeightFeature.getValue(state)
             + maxHeightWeight * maxHeightFeature.getValue(state)
@@ -56,5 +56,16 @@ public class Heuristic {
             + unevennessWeight * unevennessFeature.getValue(state);
 
         return sum;
+    }
+
+    @Override
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder();
+        for (double weight:  this.weights) {
+            sb.append(weight + ",");
+        }
+
+        return sb.toString();
     }
 }

@@ -34,7 +34,7 @@ public class Helper {
         Random rand = new Random();
 
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = rand.nextDouble();
+            weights[i] = rand.nextInt(1000);
         }
 
         return weights;

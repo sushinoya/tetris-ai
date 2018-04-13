@@ -8,12 +8,29 @@ import Tetris.Helper.Helper;
 
 public class PlayerSkeleton {
 
+    public static double bestScore;
+
 	public static TFrame frame = new TFrame(new State());
 
 	//implement this function to have a working system
-	public int pickMove(State s, int[][] legalMoves) {
-		Random rand = new Random();
-		return rand.nextInt(legalMoves.length);
+	public int pickMove(State s, int[][] legalMoves, Heuristic heuristic) {
+
+        double bestHeuristicValue = Integer.MAX_VALUE; // Minimize value
+        int bestMove = 0; // Default to first move
+
+        // Pick best move out of possible moves
+        for (int i = 0; i < legalMoves.length; i++) {
+            PotentialNextState nextState = new PotentialNextState(s);
+            nextState.makeMove(legalMoves[i]);
+            double currentHeuristicValue = heuristic.getValue(nextState);
+            if (currentHeuristicValue < bestHeuristicValue) {
+                bestMove = i;
+            }
+//            System.out.println(currentHeuristicValue);
+            bestHeuristicValue = Math.min(bestHeuristicValue, currentHeuristicValue);
+        }
+
+        return bestMove;
 	}
 
 	public static void main(String[] args) {
@@ -22,11 +39,20 @@ public class PlayerSkeleton {
 
 	// Simulates the replacement of the population by its member's descendants
 	public static void geneticFunction() {
-		ArrayList<Heuristic> population = Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
+	    int gen = 0;
 
+		ArrayList<Heuristic> population = Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
 		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
-			HashMap<Heuristic, Integer> populationWithAverageScores = getPopulationScores(population);
-			population = generateNextGeneration(populationWithAverageScores);
+            System.out.println("Collecting score for generation " + gen + "..." );
+            HashMap<Heuristic, Integer> populationWithAverageScores = getPopulationScores(population);
+            System.out.println("Done collecting for generation " + gen + "..." );
+			double populationAverage = Helper.sum(populationWithAverageScores.values()) / Constants.NUMBER_OF_HEURISTICS;
+
+            System.out.println("Generation " + gen + " Average Score: " + populationAverage);
+            gen++;
+
+
+            population = generateNextGeneration(populationWithAverageScores);
 		}
 	}
 
@@ -61,12 +87,12 @@ public class PlayerSkeleton {
 				averageScore += runGameWithHeuristic(heuristic);
 			}
 
-			System.out.println("done with one heuristic");
-
 			averageScore /= Constants.NUMBER_OF_GAMES;
 
 			averageScores.put(heuristic, averageScore);
+
 		}
+
 
 		return averageScores;
 	}
@@ -74,20 +100,27 @@ public class PlayerSkeleton {
 
 
 	public static int runGameWithHeuristic(Heuristic heuristic) {
+
+
 		State s = new State();
 		frame.bindState(s);
 		PlayerSkeleton p = new PlayerSkeleton();
 		while(!s.hasLost()) {
-			s.makeMove(p.pickMove(s,s.legalMoves()));
-			s.draw();
-			s.drawNext(0,0);
+			s.makeMove(p.pickMove(s, s.legalMoves(), heuristic));
+//			s.draw();
+//			s.drawNext(0,0);
 			try {
-				Thread.sleep(3);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
-//		System.out.println("You have completed "+s.getRowsCleared()+" rows.");
+
+        if (s.getRowsCleared() > bestScore) {
+            bestScore = s.getRowsCleared();
+            System.out.println("New Best score: " + bestScore);
+        }
+
 		return s.getRowsCleared();
 	}
 
@@ -95,9 +128,18 @@ public class PlayerSkeleton {
 	public static Tuple<ArrayList<Heuristic>, ArrayList<Integer>> generateProbabilityIntervalList(HashMap<Heuristic, Integer> populationWithScores) {
 
 		ArrayList<Heuristic> heuristicsList = new ArrayList<Heuristic>(populationWithScores.keySet());
-		ArrayList<Integer> intervalList = new ArrayList<Integer>(heuristicsList.size());
+        ArrayList<Integer> intervalList = new ArrayList<Integer>(heuristicsList.size());
+
+
+        for (int i = 0; i < Constants.NUMBER_OF_HEURISTICS; i++) {
+            intervalList.add(null);
+        }
+
+        System.out.println(heuristicsList.size());
+        System.out.println(intervalList.size());
 
 		intervalList.set(0, populationWithScores.get(heuristicsList.get(0)));
+
 		for (int k = 1; k < heuristicsList.size(); k ++) {
 			intervalList.set(k, intervalList.get(k - 1) + populationWithScores.get(heuristicsList.get(k)));
 		}
