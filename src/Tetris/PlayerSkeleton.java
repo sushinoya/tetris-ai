@@ -12,20 +12,20 @@ public class PlayerSkeleton {
 
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves, Heuristic heuristic) {
-		Random rand = new Random();
 
-        int bestHeuristicValue = Integer.MAX_VALUE; // Minimize value
+        double bestHeuristicValue = Integer.MAX_VALUE; // Minimize value
         int bestMove = 0; // Default to first move
 
         // Pick best move out of possible moves
         for (int i = 0; i < legalMoves.length; i++) {
             PotentialNextState nextState = new PotentialNextState(s);
             nextState.makeMove(legalMoves[i]);
-            int currentHeuristicValue = heuristic.getValue(nextState);
+            double currentHeuristicValue = heuristic.getValue(nextState);
             if (currentHeuristicValue < bestHeuristicValue) {
                 bestMove = i;
             }
-            bestHeuristicValue = Math.max(bestHeuristicValue, currentHeuristicValue);
+            System.out.println(currentHeuristicValue);
+            bestHeuristicValue = Math.min(bestHeuristicValue, currentHeuristicValue);
         }
 
         return bestMove;
@@ -93,7 +93,7 @@ public class PlayerSkeleton {
 		frame.bindState(s);
 		PlayerSkeleton p = new PlayerSkeleton();
 		while(!s.hasLost()) {
-			s.makeMove(p.pickMove(s,s.legalMoves()));
+			s.makeMove(p.pickMove(s, s.legalMoves(), heuristic));
 			s.draw();
 			s.drawNext(0,0);
 			try {
