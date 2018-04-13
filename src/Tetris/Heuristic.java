@@ -48,7 +48,7 @@ public class Heuristic {
     }
 
 
-    public double getValue(State state) {
+    public double getValue(PotentialNextState state) {
         double sum = 0;
         sum = averageHeightWeight * averageHeightFeature.getValue(state)
             + maxHeightWeight * maxHeightFeature.getValue(state)
