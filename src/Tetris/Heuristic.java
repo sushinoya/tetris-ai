@@ -57,4 +57,15 @@ public class Heuristic {
 
         return sum;
     }
+
+    @Override
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder();
+        for (double weight:  this.weights) {
+            sb.append(weight + ",");
+        }
+
+        return sb.toString();
+    }
 }
