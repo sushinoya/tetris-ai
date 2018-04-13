@@ -14,7 +14,7 @@ public class PotentialNextState {
     private int cleared;
 
     private int[][] field = new int[State.ROWS][State.COLS];
-    private int[] top = new int[State.ROWS];
+    private int[] top = new int[State.COLS];
 
     //number of next piece
     protected int nextPiece;
@@ -24,13 +24,27 @@ public class PotentialNextState {
         pHeight = State.getpHeight();
         pWidth = State.getpWidth();
         pTop = State.getpTop();
-        field = originalState.getField();
-        top = originalState.getTop();
+
+        setField(originalState.getField());
+        setTop(originalState.getTop());
 
         nextPiece = originalState.getNextPiece();
         turn = originalState.getTurnNumber();
-        cleared = originalState.getRowsCleared();
-    };
+    }
+
+    private void setField(int[][] newField) {
+        for (int i = 0; i < State.ROWS; i++) {
+            for (int j = 0; j < State.COLS; j++) {
+                field[i][j] = newField[i][j];
+            }
+        }
+    }
+
+    private void setTop(int[] newTop) {
+        for (int i = 0; i < State.COLS; i++) {
+            top[i] = newTop[i];
+        }
+    }
 
     public int[][] getField() {
         return field;
@@ -38,10 +52,6 @@ public class PotentialNextState {
 
     public int[] getTop() {
         return top;
-    }
-
-    public int getRowsCleared() {
-        return cleared;
     }
 
     public boolean hasLost() {
