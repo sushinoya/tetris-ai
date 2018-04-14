@@ -1,11 +1,12 @@
 package Tetris.Features;
 
 import Tetris.State;
+import Tetris.PotentialNextState;
 
 public class AverageHeightFeature extends Feature{
 
     @Override
-    public double getValue(State state) {
+    public double getValue(PotentialNextState state) {
         double sumOfHeight = 0;
 
         int[] tops = state.getTop();
@@ -13,7 +14,7 @@ public class AverageHeightFeature extends Feature{
             sumOfHeight += tops[i];
         }
 
-        double average = sumOfHeight / state.COLS;
+        double average = sumOfHeight / State.COLS;
 
         return average;
     }

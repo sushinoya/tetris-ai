@@ -1,9 +1,9 @@
 package Tetris.Features;
 
-import Tetris.State;
+import Tetris.PotentialNextState;
 
 public abstract class Feature {
 
-    public abstract double getValue(State state);
+    public abstract double getValue(PotentialNextState state);
 
 }

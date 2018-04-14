@@ -1,11 +1,11 @@
 package Tetris.Features;
 
-import Tetris.State;
+import Tetris.PotentialNextState;
 
 public class UnevennessFeature extends Feature {
 
     @Override
-    public double getValue(State state) {
+    public double getValue(PotentialNextState state) {
         double result = 0;
 
         int[] tops = state.getTop();
