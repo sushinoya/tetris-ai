@@ -10,9 +10,11 @@ import Tetris.Helper.Helper;
 public class PlayerSkeleton {
 
     public static double bestScore;
+	public static double bestAvgScoreOfHeuristic;
     public static Heuristic bestHeuristic;
 
-	public static TFrame frame = new TFrame(new State());
+	public static TFrame frame;
+
 
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves, Heuristic heuristic) {
@@ -35,6 +37,10 @@ public class PlayerSkeleton {
 	}
 
 	public static void main(String[] args) {
+		if (Constants.DRAW_ENABLED) {
+			frame = new TFrame(new State());
+		}
+
 		geneticFunction();
 	}
 
@@ -91,6 +97,12 @@ public class PlayerSkeleton {
 			}
 
 			averageScore /= Constants.NUMBER_OF_GAMES;
+
+			if (averageScore > bestAvgScoreOfHeuristic) {
+				bestAvgScoreOfHeuristic = averageScore;
+				System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic + " Weights: " + heuristic);
+			}
+
 
 			averageScores.put(heuristic, averageScore);
 
