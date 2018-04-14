@@ -1,11 +1,13 @@
 package Tetris;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.lang.*;
 
 import Tetris.Helper.Tuple;
 import Tetris.Helper.Helper;
-import com.sun.tools.classfile.ConstantPool;
 
 
 public class PlayerSkeleton {
@@ -13,7 +15,7 @@ public class PlayerSkeleton {
     public static double bestScore;
 	public static double bestAvgScoreOfHeuristic;
     public static Heuristic bestHeuristic;
-
+	private static BufferedWriter bw;
 	public static TFrame frame;
 
 
@@ -41,11 +43,23 @@ public class PlayerSkeleton {
 		if (Constants.DRAW_ENABLED) {
 			frame = new TFrame(new State());
 		}
-		if (Constants.ISGENETICRUNNING == true) {
+
+        openBuffer();
+
+		if (Constants.IS_GENETIC_RUNNING == true) {
 			geneticFunction();
 		} else {
 			SimulatedAnnealing sa = new SimulatedAnnealing();
 			sa.run();
+		}
+
+	}
+
+	public static String pickLogFile () {
+		if (Constants.NUMBER_OF_FEATURES == 4) {
+			return Constants.AVERAGE_LOG_FOR_4HEURISTICS;
+		} else {
+			return Constants.AVERAGE_LOG_FOR_5HEURISTICS;
 		}
 	}
 
@@ -96,28 +110,58 @@ public class PlayerSkeleton {
 		// Run every heuristic NUMBER_OF_GAMES times and store the average score
 		for (Heuristic heuristic : population) {
 			Integer averageScore = 0;
+            int scoreForOneRound = 0;
+			double[] scores = new double[Constants.NUMBER_OF_GAMES];
 
 			for (int i = 0; i < Constants.NUMBER_OF_GAMES; i++) {
-				averageScore += runGameWithHeuristic(heuristic);
+                scoreForOneRound = runGameWithHeuristic(heuristic);
+			    averageScore += scoreForOneRound;
+				scores[i] = scoreForOneRound;
 			}
 
 			averageScore /= Constants.NUMBER_OF_GAMES;
 
 			if (averageScore > bestAvgScoreOfHeuristic) {
 				bestAvgScoreOfHeuristic = averageScore;
-				System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic + " Weights: " + heuristic);
+				System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic + " Weights: "
+                       + heuristic + " with S.D. of " + Helper.calculateSD(scores));
 			}
 
-
+			if(averageScore > 1000) {
+				writeBuffer(heuristic, averageScore, Helper.calculateSD(scores));
+			}
 			averageScores.put(heuristic, averageScore);
 
+			flushBuffer();
 		}
-
 
 		return averageScores;
 	}
 
+	public static void openBuffer() {
+        try {
+            bw = new BufferedWriter(new FileWriter(pickLogFile()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+	public static void writeBuffer(Heuristic heuristic, Integer averageScore, double sd) {
+        try {
+            bw.write(heuristic.toString() + ", with score of " + averageScore + ", S.D. of " + sd);
+            bw.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void flushBuffer() {
+        try {
+            bw.flush();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 	public static int runGameWithHeuristic(Heuristic heuristic) {
 		State s = new State();

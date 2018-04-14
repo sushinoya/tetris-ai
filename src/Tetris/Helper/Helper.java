@@ -91,4 +91,21 @@ public class Helper {
         bd = bd.setScale(places, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
+
+    public static double calculateSD(double numArray[])
+    {
+        double sum = 0.0, standardDeviation = 0.0;
+
+        for(double num : numArray) {
+            sum += num;
+        }
+
+        double mean = sum/10;
+
+        for(double num: numArray) {
+            standardDeviation += Math.pow(num - mean, 2);
+        }
+
+        return Math.sqrt(standardDeviation/10);
+    }
 }
