@@ -5,6 +5,7 @@ import java.lang.*;
 
 import Tetris.Helper.Tuple;
 import Tetris.Helper.Helper;
+import com.sun.tools.classfile.ConstantPool;
 
 
 public class PlayerSkeleton {
@@ -40,9 +41,12 @@ public class PlayerSkeleton {
 		if (Constants.DRAW_ENABLED) {
 			frame = new TFrame(new State());
 		}
-
-		SimulatedAnnealing sa = new SimulatedAnnealing();
-		sa.run();
+		if (Constants.ISGENETICRUNNING == true) {
+			geneticFunction();
+		} else {
+			SimulatedAnnealing sa = new SimulatedAnnealing();
+			sa.run();
+		}
 	}
 
 	// Simulates the replacement of the population by its member's descendants
