@@ -1,11 +1,11 @@
 package Tetris.Features;
 
-import Tetris.State;
+import Tetris.PotentialNextState;
 
 public class MaxHeightFeature extends Feature {
 
     @Override
-    public double getValue(State state) {
+    public double getValue(PotentialNextState state) {
         double max = 0;
 
         int[] tops = state.getTop();
