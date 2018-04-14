@@ -22,9 +22,11 @@ public class Heuristic {
     double unevennessWeight;
     public static UnevennessFeature unevennessFeature = new UnevennessFeature();
 
+    double numOfPatchesWeight;
+    public static NumOfPatchesFeature numOfPatchesFeature = new NumOfPatchesFeature();
 
     // Automatically scales the weights such that their sum is Constants.SUM_OF_PROBABILITIES
-    public Heuristic(double averageHeightWeight, double maxHeightWeight, double numOfHolesWeight, double unevennessWeight) {
+    public Heuristic(double averageHeightWeight, double maxHeightWeight, double numOfHolesWeight, double unevennessWeight, double numOfPatchesWeight) {
 
         double[] weights = new double[Constants.NUMBER_OF_FEATURES];
 
@@ -32,6 +34,7 @@ public class Heuristic {
         weights[1] = maxHeightWeight;
         weights[2] = numOfHolesWeight;
         weights[3] = unevennessWeight;
+        weights[4] = numOfPatchesWeight;
 
         this.weights = Helper.scaleWeights(weights);
 
@@ -39,12 +42,13 @@ public class Heuristic {
         this.maxHeightWeight = this.weights[1];
         this.numOfHolesWeight = this.weights[2];
         this.unevennessWeight = this.weights[3];
+        this.numOfPatchesWeight = this.weights[4];
 
     }
 
 
     public Heuristic(double[] weights) {
-        this(weights[0], weights[1], weights[2], weights[3]);
+        this(weights[0], weights[1], weights[2], weights[3], weights[4]);
     }
 
 

@@ -41,7 +41,8 @@ public class PlayerSkeleton {
 			frame = new TFrame(new State());
 		}
 
-		geneticFunction();
+		SimulatedAnnealing sa = new SimulatedAnnealing();
+		sa.run();
 	}
 
 	// Simulates the replacement of the population by its member's descendants
@@ -228,8 +229,6 @@ public class PlayerSkeleton {
 
 class SimulatedAnnealing {
 
-	private static final int NUM_GAMES = 5;
-	private static final int NUM_ITERATIONS = 100;
 	private double score;
 	private int iteration;
 	private Random random;
@@ -248,7 +247,7 @@ class SimulatedAnnealing {
 	public Heuristic getHeuristic() {
 		double initialTemperature = calculateInitialTemperature();
 		double temperature = initialTemperature;
-		Heuristic heuristic  = new Heuristic(27.29, 0.29, 60.42, 13.98);
+		Heuristic heuristic  = new Heuristic(8.15, 2.31, 50.41, 11.44, 30.79);
 		while (true) {
 			if (temperature < 1) {
 				System.out.println("Cooled down! The result is obtained.");
@@ -265,23 +264,23 @@ class SimulatedAnnealing {
 
 			temperature = scheduleNewTemperature(initialTemperature, iteration);
 			System.out.println(temperature);
-			System.out.println(heuristic.averageHeightWeight + " " + heuristic.maxHeightWeight + " " + heuristic.numOfHolesWeight + " " + heuristic.unevennessWeight);
+			System.out.println(heuristic.averageHeightWeight + " " + heuristic.maxHeightWeight + " " + heuristic.numOfHolesWeight + " " + heuristic.unevennessWeight + " " + heuristic.numOfPatchesWeight);
 			iteration++;
 		}
 	}
 
 	public double calculateInitialTemperature() {
-		return 200;
+		return 500;
 	}
 
 	public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
 		Heuristic newHeuristic = new Heuristic(heuristic.averageHeightWeight, heuristic.maxHeightWeight,
-				heuristic.numOfHolesWeight, heuristic.unevennessWeight);
-		double valueChange = random.nextDouble() * 10;
+				heuristic.numOfHolesWeight, heuristic.unevennessWeight, heuristic.numOfPatchesWeight);
+		double valueChange = random.nextDouble() * 5;
 		double sum = newHeuristic.averageHeightWeight + newHeuristic.maxHeightWeight + newHeuristic.numOfHolesWeight
-				+ newHeuristic.unevennessWeight + valueChange;
+				+ newHeuristic.unevennessWeight + newHeuristic.numOfPatchesWeight + valueChange;
 		// The index indicates which weight is changed
-		int index = random.nextInt(4);
+		int index = random.nextInt(5);
 		switch(index) {
 		case 0:
 			newHeuristic.averageHeightWeight += valueChange;
@@ -295,11 +294,14 @@ class SimulatedAnnealing {
 		case 3:
 			newHeuristic.unevennessWeight += valueChange;
 			break;
+		case 4:
+			newHeuristic.numOfPatchesWeight += valueChange;
 		}
 		newHeuristic.averageHeightWeight = newHeuristic.averageHeightWeight * 100 / sum;
 		newHeuristic.maxHeightWeight = newHeuristic.maxHeightWeight * 100 / sum;
 		newHeuristic.numOfHolesWeight = newHeuristic.numOfHolesWeight * 100 / sum;
 		newHeuristic.unevennessWeight = newHeuristic.unevennessWeight * 100 / sum;
+		newHeuristic.numOfPatchesWeight = newHeuristic.numOfPatchesWeight * 100 / sum;
 
 		return newHeuristic;
 	}
