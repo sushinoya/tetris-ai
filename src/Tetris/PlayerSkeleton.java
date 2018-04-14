@@ -35,7 +35,9 @@ public class PlayerSkeleton {
 	}
 
 	public static void main(String[] args) {
-		geneticFunction();
+		//geneticFunction();
+		SimulatedAnnealing sa = new SimulatedAnnealing();
+		sa.run();
 	}
 
 	// Simulates the replacement of the population by its member's descendants
@@ -211,5 +213,115 @@ public class PlayerSkeleton {
 		}
 
 		return new Heuristic(childWeights);
+	}
+}
+
+class SimulatedAnnealing {
+
+	private static final int NUM_GAMES = 5;
+	private static final int NUM_ITERATIONS = 100;
+	private double score;
+	private int iteration;
+	private Random random;
+
+	public SimulatedAnnealing() {
+		score = 0;
+		iteration = 0;
+		random = new Random();
+	}
+
+	public void run() {
+		score = PlayerSkeleton.runGameWithHeuristic(getHeuristic());
+		System.out.println(score);
+	}
+
+	public Heuristic getHeuristic() {
+		double initialTemperature = calculateInitialTemperature();
+		double temperature = initialTemperature;
+		Heuristic heuristic  = new Heuristic(27.29, 0.29, 60.42, 13.98);
+		while (true) {
+			if (temperature < 1) {
+				System.out.println("Cooled down! The result is obtained.");
+				return heuristic;
+			}
+
+			Heuristic newHeuristic = getNeighbourHeuristic(heuristic);
+			double averageScoreWithOldHeuristic = getAverageScore(heuristic, 5);
+			double averageScoreWithNewHeuristic = getAverageScore(newHeuristic, 5);
+			double improvementFromOlderHeuristic = averageScoreWithNewHeuristic - averageScoreWithOldHeuristic;
+			if (isAccepted(temperature, improvementFromOlderHeuristic)) {
+				heuristic = newHeuristic;
+			}
+
+			temperature = scheduleNewTemperature(initialTemperature, iteration);
+			System.out.println(temperature);
+			System.out.println(heuristic.averageHeightWeight + " " + heuristic.maxHeightWeight + " " + heuristic.numOfHolesWeight + " " + heuristic.unevennessWeight);
+			iteration++;
+		}
+	}
+
+	public double calculateInitialTemperature() {
+		return 200;
+	}
+
+	public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
+		Heuristic newHeuristic = new Heuristic(heuristic.averageHeightWeight, heuristic.maxHeightWeight,
+				heuristic.numOfHolesWeight, heuristic.unevennessWeight);
+		double valueChange = random.nextDouble() * 10;
+		double sum = newHeuristic.averageHeightWeight + newHeuristic.maxHeightWeight + newHeuristic.numOfHolesWeight
+				+ newHeuristic.unevennessWeight + valueChange;
+		// The index indicates which weight is changed
+		int index = random.nextInt(4);
+		switch(index) {
+		case 0:
+			newHeuristic.averageHeightWeight += valueChange;
+			break;
+		case 1:
+			newHeuristic.maxHeightWeight += valueChange;
+			break;
+		case 2:
+			newHeuristic.numOfHolesWeight += valueChange;
+			break;
+		case 3:
+			newHeuristic.unevennessWeight += valueChange;
+			break;
+		}
+		newHeuristic.averageHeightWeight = newHeuristic.averageHeightWeight * 100 / sum;
+		newHeuristic.maxHeightWeight = newHeuristic.maxHeightWeight * 100 / sum;
+		newHeuristic.numOfHolesWeight = newHeuristic.numOfHolesWeight * 100 / sum;
+		newHeuristic.unevennessWeight = newHeuristic.unevennessWeight * 100 / sum;
+
+		return newHeuristic;
+	}
+
+	public boolean isAccepted(double temperature, double improvementFromOlderHeuristic) {
+		double acceptanceProbability = getAcceptanceProbability(temperature, improvementFromOlderHeuristic);
+		if (acceptanceProbability >= random.nextDouble()) {
+			System.out.println("This is called");
+			return true;
+		}
+		return false;
+	}
+
+	public double getAcceptanceProbability(double temperature, double improvementFromOlderHeuristic) {
+		if (improvementFromOlderHeuristic > 0) {
+			return 1.0;
+		} else {
+			return Math.exp((improvementFromOlderHeuristic) / temperature);
+		}
+	}
+
+	public double scheduleNewTemperature(double initialTemperature, int iteration) {
+		double newTemperature = initialTemperature / (1 + Math.log(1 + iteration));
+		return newTemperature;
+	}
+
+	public double getAverageScore(Heuristic heuristic, int rounds) {
+		double sum = 0;
+		for (int i = 0; i < rounds; i++) {
+			sum += PlayerSkeleton.runGameWithHeuristic(heuristic);
+		}
+		System.out.println("Score: " + sum / rounds);
+		return sum / rounds;
 	}
 }
