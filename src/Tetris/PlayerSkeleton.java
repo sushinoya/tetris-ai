@@ -6,9 +6,11 @@ import java.lang.*;
 import Tetris.Helper.Tuple;
 import Tetris.Helper.Helper;
 
+
 public class PlayerSkeleton {
 
     public static double bestScore;
+    public static Heuristic bestHeuristic;
 
 	public static TFrame frame = new TFrame(new State());
 
@@ -26,7 +28,6 @@ public class PlayerSkeleton {
             if (currentHeuristicValue < bestHeuristicValue) {
                 bestMove = i;
             }
-//            System.out.println(currentHeuristicValue);
             bestHeuristicValue = Math.min(bestHeuristicValue, currentHeuristicValue);
         }
 
@@ -43,14 +44,16 @@ public class PlayerSkeleton {
 
 		ArrayList<Heuristic> population = Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
 		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
-            System.out.println("Collecting score for generation " + gen + "..." );
+            System.out.println("\nCollecting score for generation " + gen + "..." );
+
             HashMap<Heuristic, Integer> populationWithAverageScores = getPopulationScores(population);
-            System.out.println("Done collecting for generation " + gen + "..." );
+
+            System.out.println("Done collecting for generation " + gen + ".\n" );
+
 			double populationAverage = Helper.sum(populationWithAverageScores.values()) / Constants.NUMBER_OF_HEURISTICS;
 
             System.out.println("Generation " + gen + " Average Score: " + populationAverage);
             gen++;
-
 
             population = generateNextGeneration(populationWithAverageScores);
 		}
@@ -100,26 +103,33 @@ public class PlayerSkeleton {
 
 
 	public static int runGameWithHeuristic(Heuristic heuristic) {
-
-
 		State s = new State();
-		frame.bindState(s);
 		PlayerSkeleton p = new PlayerSkeleton();
+
+		if (Constants.DRAW_ENABLED) {
+			frame.bindState(s);
+		}
+
 		while(!s.hasLost()) {
 			s.makeMove(p.pickMove(s, s.legalMoves(), heuristic));
-//			s.draw();
-//			s.drawNext(0,0);
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+
+			if (Constants.DRAW_ENABLED) {
+				s.draw();
+				s.drawNext(0,0);
+				try {
+					Thread.sleep(Constants.WAITING_TIME);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
+
 		}
 
         if (s.getRowsCleared() > bestScore) {
             bestScore = s.getRowsCleared();
-            System.out.println("New Best score: " + bestScore);
-        }
+			bestHeuristic = heuristic;
+            System.out.println("New Best score: " + bestScore + " Weights: " + bestHeuristic);
+		}
 
 		return s.getRowsCleared();
 	}
@@ -134,9 +144,6 @@ public class PlayerSkeleton {
         for (int i = 0; i < Constants.NUMBER_OF_HEURISTICS; i++) {
             intervalList.add(null);
         }
-
-        System.out.println(heuristicsList.size());
-        System.out.println(intervalList.size());
 
 		intervalList.set(0, populationWithScores.get(heuristicsList.get(0)));
 

@@ -61,11 +61,12 @@ public class Heuristic {
     @Override
     public String toString() {
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("(");
         for (double weight:  this.weights) {
-            sb.append(weight + ",");
+            sb.append(Helper.round(weight, 2) + ", ");
         }
 
-        return sb.toString();
+        String separatedByCommas = sb.toString();
+        return separatedByCommas.substring(0, separatedByCommas.length() - 2) + ")";
     }
 }
