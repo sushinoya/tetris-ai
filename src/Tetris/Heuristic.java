@@ -7,12 +7,13 @@ import Tetris.Helper.*;
 public class Heuristic {
 
     double[] weights;
-    private static Feature[] features = {
+    public static Feature[] features = {
         new AverageHeightFeature(),
         new MaxHeightFeature(),
         new NumOfHolesFeature(),
         new UnevennessFeature(),
-        new NumOfPatchesFeature()
+        new NumOfPatchesFeature(),
+        new NumOfRowsCleared()
     };
 
 
