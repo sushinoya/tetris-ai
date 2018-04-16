@@ -327,7 +327,7 @@ class SimulatedAnnealing {
 
 			temperature = scheduleNewTemperature(initialTemperature, iteration);
 			System.out.println(temperature);
-			System.out.println(heuristic.averageHeightWeight + " " + heuristic.maxHeightWeight + " " + heuristic.numOfHolesWeight + " " + heuristic.unevennessWeight + " " + heuristic.numOfPatchesWeight);
+			System.out.println(heuristic);
 			iteration++;
 		}
 	}
@@ -337,34 +337,17 @@ class SimulatedAnnealing {
 	}
 
 	public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
-		Heuristic newHeuristic = new Heuristic(heuristic.averageHeightWeight, heuristic.maxHeightWeight,
-				heuristic.numOfHolesWeight, heuristic.unevennessWeight, heuristic.numOfPatchesWeight);
+		Heuristic newHeuristic = new Heuristic(heuristic.weights);
 		double valueChange = random.nextDouble() * 5;
-		double sum = newHeuristic.averageHeightWeight + newHeuristic.maxHeightWeight + newHeuristic.numOfHolesWeight
-				+ newHeuristic.unevennessWeight + newHeuristic.numOfPatchesWeight + valueChange;
+		double sum = Helper.sum(heuristic.weights) + valueChange;
 		// The index indicates which weight is changed
 		int index = random.nextInt(5);
-		switch(index) {
-		case 0:
-			newHeuristic.averageHeightWeight += valueChange;
-			break;
-		case 1:
-			newHeuristic.maxHeightWeight += valueChange;
-			break;
-		case 2:
-			newHeuristic.numOfHolesWeight += valueChange;
-			break;
-		case 3:
-			newHeuristic.unevennessWeight += valueChange;
-			break;
-		case 4:
-			newHeuristic.numOfPatchesWeight += valueChange;
+
+		newHeuristic.weights[index] += valueChange;
+
+		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
+			newHeuristic.weights[i] = newHeuristic.weights[i] * 100 / sum;
 		}
-		newHeuristic.averageHeightWeight = newHeuristic.averageHeightWeight * 100 / sum;
-		newHeuristic.maxHeightWeight = newHeuristic.maxHeightWeight * 100 / sum;
-		newHeuristic.numOfHolesWeight = newHeuristic.numOfHolesWeight * 100 / sum;
-		newHeuristic.unevennessWeight = newHeuristic.unevennessWeight * 100 / sum;
-		newHeuristic.numOfPatchesWeight = newHeuristic.numOfPatchesWeight * 100 / sum;
 
 		return newHeuristic;
 	}
