@@ -253,7 +253,11 @@ public class PlayerSkeleton {
 		double[] motherWeights = mother.getFirst().weights;
 		double[] fatherWeights = father.getFirst().weights;
 
-		numOfWeightsFromMother = (int) Math.round(scoreRatio * Constants.NUMBER_OF_FEATURES);
+		if (Constants.REPRODUCE_PROPORTIONATELY) {
+			numOfWeightsFromMother = (int) Math.round(scoreRatio * Constants.NUMBER_OF_FEATURES);
+		} else {
+			numOfWeightsFromMother = Constants.NUMBER_OF_FEATURES / 2;
+		}
 
 		int[] weightIndexesFromMother = Helper.generateRandomIndices(numOfWeightsFromMother, Constants.NUMBER_OF_FEATURES);
 
