@@ -94,7 +94,12 @@ public class PlayerSkeleton {
 		for (int i = 0; i < populationWithScores.size(); i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
-			Heuristic child = weightedReproduce(mother, father);
+
+			while (mother.getFirst().equals(father.getFirst())) {
+				father = randomSelect(populationWithScores, heuristicsAndIntervals);
+			}
+
+			Heuristic child = reproduce(mother, father);
 
 			// Add lines to mimic random mutation
 			newPopulation.add(child);
@@ -248,14 +253,7 @@ public class PlayerSkeleton {
 		double[] motherWeights = mother.getFirst().weights;
 		double[] fatherWeights = father.getFirst().weights;
 
-		if (scoreRatio < 1/4) {
-			numOfWeightsFromMother = (Constants.NUMBER_OF_FEATURES / 4) + 1;
-		} else if (scoreRatio < 3/4) {
-			numOfWeightsFromMother = Constants.NUMBER_OF_FEATURES / 2;
-		} else {
-			numOfWeightsFromMother = (3 * Constants.NUMBER_OF_FEATURES / 4);
-		}
-
+		numOfWeightsFromMother = (int) Math.round(scoreRatio * Constants.NUMBER_OF_FEATURES);
 
 		int[] weightIndexesFromMother = Helper.generateRandomIndices(numOfWeightsFromMother, Constants.NUMBER_OF_FEATURES);
 

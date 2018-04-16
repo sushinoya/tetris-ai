@@ -73,4 +73,16 @@ public class Heuristic {
         String separatedByCommas = sb.toString();
         return separatedByCommas.substring(0, separatedByCommas.length() - 2) + ")";
     }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        Heuristic other = (Heuristic) obj;
+        for (int i = 0; i < this.weights.length; i++) {
+            if (this.weights[i] != other.weights[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
