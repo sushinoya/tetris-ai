@@ -94,7 +94,7 @@ public class PlayerSkeleton {
 		for (int i = 0; i < populationWithScores.size(); i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
-			Heuristic child = reproduce(mother, father);
+			Heuristic child = weightedReproduce(mother, father);
 
 			// Add lines to mimic random mutation
 			newPopulation.add(child);
@@ -269,6 +269,23 @@ public class PlayerSkeleton {
 			} else {
 				childWeights[i] = fatherWeights[i];
 			}
+		}
+
+		return new Heuristic(childWeights);
+	}
+
+
+	public static Heuristic weightedReproduce(Tuple<Heuristic, Integer> mother, Tuple<Heuristic, Integer> father) {
+		double scoreRatio = mother.getSecond() / father.getSecond();
+		double[] motherWeights = mother.getFirst().weights;
+		double[] fatherWeights = father.getFirst().weights;
+
+
+
+		double[] childWeights = new double[Constants.NUMBER_OF_FEATURES];
+
+		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
+			childWeights[i] = motherWeights[i] * mother.getSecond() + fatherWeights[i] * father.getSecond();
 		}
 
 		return new Heuristic(childWeights);
