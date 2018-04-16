@@ -7,62 +7,29 @@ import Tetris.Helper.*;
 public class Heuristic {
 
     double[] weights;
+    private static Feature[] features = {
+        new AverageHeightFeature(),
+        new MaxHeightFeature(),
+        new NumOfHolesFeature(),
+        new UnevennessFeature(),
+        new NumOfPatchesFeature()
+    };
 
-    //these double values represent the weight on each feature
-    //the feature represents the features themselves
-    double averageHeightWeight;
-    public static AverageHeightFeature averageHeightFeature = new AverageHeightFeature();
-
-    double maxHeightWeight;
-    public static MaxHeightFeature maxHeightFeature = new MaxHeightFeature();
-
-    double numOfHolesWeight;
-    public static NumOfHolesFeature numOfHolesFeature = new NumOfHolesFeature();
-
-    double unevennessWeight;
-    public static UnevennessFeature unevennessFeature = new UnevennessFeature();
-
-    double numOfPatchesWeight;
-    public static NumOfPatchesFeature numOfPatchesFeature = new NumOfPatchesFeature();
 
     // Automatically scales the weights such that their sum is Constants.SUM_OF_PROBABILITIES
-    public Heuristic(double averageHeightWeight, double maxHeightWeight, double numOfHolesWeight, double unevennessWeight, double numOfPatchesWeight) {
-
-        double[] weights = new double[Constants.NUMBER_OF_FEATURES];
-
-        weights[0] = averageHeightWeight;
-        weights[1] = maxHeightWeight;
-        weights[2] = numOfHolesWeight;
-        weights[3] = unevennessWeight;
-        weights[4] = numOfPatchesWeight;
-
+    public Heuristic(double... weights) {
         this.weights = Helper.scaleWeights(weights);
-
-        this.averageHeightWeight = this.weights[0];
-        this.maxHeightWeight = this.weights[1];
-        this.numOfHolesWeight = this.weights[2];
-        this.unevennessWeight = this.weights[3];
-        this.numOfPatchesWeight = this.weights[4];
-
-    }
-
-
-    public Heuristic(double[] weights) {
-        this(weights[0], weights[1], weights[2], weights[3], weights[4]);
     }
 
 
     public double getValue(PotentialNextState state) {
         double sum = 0;
-        sum = averageHeightWeight * averageHeightFeature.getValue(state)
-            + maxHeightWeight * maxHeightFeature.getValue(state)
-            + numOfHolesWeight * numOfHolesFeature.getValue(state)
-            + unevennessWeight * unevennessFeature.getValue(state)
-                + numOfPatchesWeight * numOfPatchesFeature.getValue(state);
-
-
+        for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
+            sum += features[i].getValue(state) * weights[i];
+        }
         return sum;
     }
+
 
     @Override
     public String toString() {
