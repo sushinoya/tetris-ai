@@ -6,6 +6,8 @@ public final class Constants {
     public final static int NUMBER_OF_HEURISTICS = 100;
     public final static int SUM_OF_PROBABILITIES = 100;
     public final static int NUMBER_OF_GENERATIONS = 100;
+    public final static double PROBABILITY_OF_MUTATION = 0.05;
+    public final static double MAX_MUTATION_CHANGE = 0.2;
     public final static int NUMBER_OF_FEATURES = Heuristic.features.length;
     public final static boolean DRAW_ENABLED = false;
     public final static boolean REPRODUCE_PROPORTIONATELY = false;

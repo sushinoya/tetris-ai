@@ -101,11 +101,32 @@ public class PlayerSkeleton {
 
 			Heuristic child = reproduce(mother, father);
 
+			// Mutate child
+			child = mutate(child);
+
 			// Add lines to mimic random mutation
 			newPopulation.add(child);
 		}
 
 		return newPopulation;
+	}
+
+
+	public static Heuristic mutate(Heuristic heuristic) {
+		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
+			boolean shouldMutate = new Random().nextDouble() < Constants.PROBABILITY_OF_MUTATION;
+			boolean shouldAddNotSubtract = new Random().nextDouble() < 0.5;
+			double changeBy = new Random().nextDouble() * Constants.MAX_MUTATION_CHANGE;
+
+			if (shouldMutate) {
+				if (shouldAddNotSubtract) {
+					heuristic.weights[i] += heuristic.weights[i] * changeBy;
+				} else {
+					heuristic.weights[i] -= heuristic.weights[i] * changeBy;
+				}
+			}
+		}
+		return new Heuristic(heuristic.weights);
 	}
 
 
