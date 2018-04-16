@@ -57,7 +57,9 @@ public class Heuristic {
         sum = averageHeightWeight * averageHeightFeature.getValue(state)
             + maxHeightWeight * maxHeightFeature.getValue(state)
             + numOfHolesWeight * numOfHolesFeature.getValue(state)
-            + unevennessWeight * unevennessFeature.getValue(state);
+            + unevennessWeight * unevennessFeature.getValue(state)
+                + numOfPatchesWeight * numOfPatchesFeature.getValue(state);
+
 
         return sum;
     }
