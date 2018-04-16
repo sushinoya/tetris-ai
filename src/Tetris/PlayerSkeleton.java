@@ -129,7 +129,7 @@ public class PlayerSkeleton {
 			if (averageScore > bestAvgScoreOfHeuristic) {
 				bestAvgScoreOfHeuristic = averageScore;
 				System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic + " Weights: "
-                       + heuristic + " with S.D. of " + Helper.calculateSD(scores));
+                       + heuristic + " with S.D. of " + Helper.round(Helper.calculateSD(scores), 2));
 			}
 
 			if(averageScore > 1000) {
@@ -153,7 +153,7 @@ public class PlayerSkeleton {
 
 	public static void writeBuffer(Heuristic heuristic, Integer averageScore, double sd) {
         try {
-            bw.write(heuristic.toString() + ", with score of " + averageScore + ", S.D. of " + sd);
+            bw.write(heuristic.toString() + ", with score of " + averageScore + ", S.D. of " + Helper.round(sd, 2));
             bw.newLine();
         } catch (IOException e) {
             e.printStackTrace();
