@@ -3,7 +3,7 @@ package Tetris.Features;
 import Tetris.PotentialNextState;
 import Tetris.State;
 
-public class NumOfBlocksOnHolesFeature extends Feature {
+public class NumOfBlocksAboveHolesFeature extends Feature {
 
     @Override
     public double getValue(PotentialNextState state) {

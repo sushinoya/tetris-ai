@@ -25,7 +25,7 @@ public class NumOfWells extends Feature {
                 }
             }
         }
-        return 0;
+        return wellSum;
 
     }
 
