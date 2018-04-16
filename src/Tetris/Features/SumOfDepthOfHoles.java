@@ -14,7 +14,7 @@ public class SumOfDepthOfHoles extends Feature {
         for (int col = 0; col < State.COLS; col++) {
             for (int row = 0; row < tops[col]; row++) {
                 if (field[row][col] == 0) {
-                    sumOfDepthOfHoles = col;
+                    sumOfDepthOfHoles += tops[col] - row;
                 }
             }
         }
