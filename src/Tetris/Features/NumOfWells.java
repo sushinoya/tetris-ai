@@ -7,6 +7,7 @@ public class NumOfWells extends Feature {
 
     @Override
     public double getValue(PotentialNextState s) {
+
         int[][] field = s.getField();
         int[] top = s.getTop();
         int wellSum = 0;
@@ -24,7 +25,8 @@ public class NumOfWells extends Feature {
                 }
             }
         }
-        return wellSum;
+        return 0;
+
     }
 
 }
