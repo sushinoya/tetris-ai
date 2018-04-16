@@ -73,6 +73,15 @@ public class Helper {
         return sum;
     }
 
+    // Sums the values in an ArrayList<T>
+    public static int sum(ArrayList<Double> arr) {
+        int sum = 0;
+        for (double i: arr) {
+            sum += i;
+        }
+        return sum;
+    }
+
     // Contains method cause stupid Java couldn't have provided one
     public static boolean contains (int[] arr, int toFind) {
         for (int elem: arr) {
