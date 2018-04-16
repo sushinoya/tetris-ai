@@ -129,4 +129,8 @@ public class PotentialNextState {
         return true;
     }
 
+    public int getCleared() {
+        return cleared;
+    }
+
 }
