@@ -99,7 +99,13 @@ public class PlayerSkeleton {
 				father = randomSelect(populationWithScores, heuristicsAndIntervals);
 			}
 
-			Heuristic child = reproduce(mother, father);
+			Heuristic child;
+			if (Constants.USE_WEIGHTED_REPRODUCE) {
+				child = weightedReproduce(mother, father);
+
+			} else {
+				child = reproduce(mother, father);
+			}
 
 			// Mutate child
 			child = mutate(child);

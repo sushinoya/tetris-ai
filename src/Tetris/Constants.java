@@ -11,6 +11,7 @@ public final class Constants {
     public final static int NUMBER_OF_FEATURES = Heuristic.features.length;
     public final static boolean DRAW_ENABLED = false;
     public final static boolean REPRODUCE_PROPORTIONATELY = false;
+    public final static boolean USE_WEIGHTED_REPRODUCE = true;
     public final static int WAITING_TIME = 1;
     public final static boolean IS_GENETIC_RUNNING = true;
     public final static String AVERAGE_LOG_FOR_4HEURISTICS = "best_4_averages.txt";
