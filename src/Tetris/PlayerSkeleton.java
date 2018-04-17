@@ -95,9 +95,12 @@ public class PlayerSkeleton {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
 
-			while (mother.getFirst().equals(father.getFirst())) {
-				father = randomSelect(populationWithScores, heuristicsAndIntervals);
+			if (!Constants.ALLOW_MASTURBATION_REPRODUCTION) {
+				while (mother.getFirst().equals(father.getFirst())) {
+					father = randomSelect(populationWithScores, heuristicsAndIntervals);
+				}
 			}
+
 
 			Heuristic child;
 			if (Constants.USE_WEIGHTED_REPRODUCE) {
@@ -119,6 +122,7 @@ public class PlayerSkeleton {
 
 
 	public static Heuristic mutate(Heuristic heuristic) {
+
 		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
 			boolean shouldMutate = new Random().nextDouble() < Constants.PROBABILITY_OF_MUTATION;
 			boolean shouldAddNotSubtract = new Random().nextDouble() < 0.5;
@@ -215,7 +219,6 @@ public class PlayerSkeleton {
 					e.printStackTrace();
 				}
 			}
-
 		}
 
         if (s.getRowsCleared() > bestScore) {

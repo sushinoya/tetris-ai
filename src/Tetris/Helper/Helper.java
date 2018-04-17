@@ -45,7 +45,13 @@ public class Helper {
         double[] weights = new double[numberOfWeights];
 
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = new Random().nextDouble();
+
+            if (Constants.USE_ZERO_INITIAL_POPULATON) {
+                weights[i] = 0;
+            } else {
+                weights[i] = new Random().nextDouble();
+            }
+
         }
 
         return weights;
