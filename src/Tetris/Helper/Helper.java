@@ -33,10 +33,8 @@ public class Helper {
     public static double[] getRandomWeights(int numberOfWeights) {
         double[] weights = new double[numberOfWeights];
 
-        Random rand = new Random();
-
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = rand.nextInt(10000);
+            weights[i] = new Random().nextDouble();
         }
 
         return weights;
