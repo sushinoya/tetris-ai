@@ -308,14 +308,14 @@ public class PlayerSkeleton {
 		double motherScore = mother.getSecond();
 		double fatherScore = father.getSecond();
 
-		double normalisingFactor = Math.sqrt(Math.pow(motherScore, 2) + Math.pow(fatherScore, 2));
 
 		double[] childWeights = new double[Constants.NUMBER_OF_FEATURES];
 
 		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
-			childWeights[i] = (motherWeights[i] * motherScore + fatherWeights[i] * fatherScore) / normalisingFactor;
+			childWeights[i] = (motherWeights[i] * motherScore + fatherWeights[i] * fatherScore);
 		}
 
+		// Normalisation happens when a Heuristic is constructed.
 		return new Heuristic(childWeights);
 	}
 }

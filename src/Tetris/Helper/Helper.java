@@ -21,10 +21,21 @@ public class Helper {
 
 
     public static double[] scaleWeights(double[] unscaledWeights) {
-        int sum = Helper.sum(unscaledWeights);
-        unscaledWeights = Arrays.stream(unscaledWeights).map(s -> s * Constants.SUM_OF_PROBABILITIES / sum).toArray();
-        return unscaledWeights;
+
+        double sumOfWeights =  Helper.sum(Arrays.stream(unscaledWeights).map(x -> Math.pow(x, 2)).toArray());
+        double normalisingFactor = Math.sqrt(sumOfWeights);
+
+        return Arrays.stream(unscaledWeights).map(x -> x / normalisingFactor).toArray();
+
     }
+
+    // Old scaled weight function
+//    public static double[] scaleWeights(double[] unscaledWeights) {
+//        int sum = Helper.sum(unscaledWeights);
+//        unscaledWeights = Arrays.stream(unscaledWeights).map(s -> s * Constants.SUM_OF_PROBABILITIES / sum).toArray();
+//        return unscaledWeights;
+//    }
+
 
 
     // This method generates a list of random weights. This sum does not add up to Constants.SUM_OF_PROBABILITIES
