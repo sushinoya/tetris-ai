@@ -21,10 +21,21 @@ public class Helper {
 
 
     public static double[] scaleWeights(double[] unscaledWeights) {
-        int sum = Helper.sum(unscaledWeights);
-        unscaledWeights = Arrays.stream(unscaledWeights).map(s -> s * Constants.SUM_OF_PROBABILITIES / sum).toArray();
-        return unscaledWeights;
+
+        double sumOfWeights =  Helper.sum(Arrays.stream(unscaledWeights).map(x -> Math.pow(x, 2)).toArray());
+        double normalisingFactor = Math.sqrt(sumOfWeights);
+        double[] normalised = Arrays.stream(unscaledWeights).map(x -> x / normalisingFactor).toArray();
+
+        return normalised;
     }
+
+    // Old scaled weight function
+//    public static double[] scaleWeights(double[] unscaledWeights) {
+//        int sum = Helper.sum(unscaledWeights);
+//        unscaledWeights = Arrays.stream(unscaledWeights).map(s -> s * Constants.SUM_OF_PROBABILITIES / sum).toArray();
+//        return unscaledWeights;
+//    }
+
 
 
     // This method generates a list of random weights. This sum does not add up to Constants.SUM_OF_PROBABILITIES
@@ -33,10 +44,14 @@ public class Helper {
     public static double[] getRandomWeights(int numberOfWeights) {
         double[] weights = new double[numberOfWeights];
 
-        Random rand = new Random();
-
         for (int i = 0; i < weights.length; i++) {
-            weights[i] = rand.nextInt(10000);
+
+            if (Constants.USE_ZERO_INITIAL_POPULATON) {
+                weights[i] = 0;
+            } else {
+                weights[i] = new Random().nextDouble();
+            }
+
         }
 
         return weights;
@@ -65,8 +80,8 @@ public class Helper {
 
 
     // Sums the values in an ArrayList<T>
-    public static int sum(double[] arr) {
-        int sum = 0;
+    public static double sum(double[] arr) {
+        double sum = 0;
         for (double i: arr) {
             sum += i;
         }
