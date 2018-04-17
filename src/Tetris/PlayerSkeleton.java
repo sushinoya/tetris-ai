@@ -1,5 +1,8 @@
 package Tetris;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.lang.*;
 
@@ -10,9 +13,11 @@ import Tetris.Helper.Helper;
 public class PlayerSkeleton {
 
     public static double bestScore;
+	public static double bestAvgScoreOfHeuristic;
     public static Heuristic bestHeuristic;
+	private static BufferedWriter bw;
+	public static TFrame frame;
 
-	public static TFrame frame = new TFrame(new State());
 
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves, Heuristic heuristic) {
@@ -34,8 +39,28 @@ public class PlayerSkeleton {
         return bestMove;
 	}
 
-	public static void main(String[] args) {
-		geneticFunction();
+	public static void main(String[] args) throws IOException {
+		if (Constants.DRAW_ENABLED) {
+			frame = new TFrame(new State());
+		}
+
+        openBuffer();
+
+		if (Constants.IS_GENETIC_RUNNING == true) {
+			geneticFunction();
+		} else {
+			SimulatedAnnealing sa = new SimulatedAnnealing();
+			sa.run();
+		}
+
+	}
+
+	public static String pickLogFile () {
+		if (Constants.NUMBER_OF_FEATURES == 4) {
+			return Constants.AVERAGE_LOG_FOR_4HEURISTICS;
+		} else {
+			return Constants.AVERAGE_LOG_FOR_5HEURISTICS;
+		}
 	}
 
 	// Simulates the replacement of the population by its member's descendants
@@ -69,7 +94,21 @@ public class PlayerSkeleton {
 		for (int i = 0; i < populationWithScores.size(); i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
-			Heuristic child = reproduce(mother, father);
+
+			while (mother.getFirst().equals(father.getFirst())) {
+				father = randomSelect(populationWithScores, heuristicsAndIntervals);
+			}
+
+			Heuristic child;
+			if (Constants.USE_WEIGHTED_REPRODUCE) {
+				child = weightedReproduce(mother, father);
+
+			} else {
+				child = reproduce(mother, father);
+			}
+
+			// Mutate child
+			child = mutate(child);
 
 			// Add lines to mimic random mutation
 			newPopulation.add(child);
@@ -79,28 +118,82 @@ public class PlayerSkeleton {
 	}
 
 
+	public static Heuristic mutate(Heuristic heuristic) {
+		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
+			boolean shouldMutate = new Random().nextDouble() < Constants.PROBABILITY_OF_MUTATION;
+			boolean shouldAddNotSubtract = new Random().nextDouble() < 0.5;
+			double changeBy = new Random().nextDouble() * Constants.MAX_MUTATION_CHANGE;
+
+			if (shouldMutate) {
+				if (shouldAddNotSubtract) {
+					heuristic.weights[i] += heuristic.weights[i] * changeBy;
+				} else {
+					heuristic.weights[i] -= heuristic.weights[i] * changeBy;
+				}
+			}
+		}
+		return new Heuristic(heuristic.weights);
+	}
+
+
 	public static HashMap<Heuristic, Integer> getPopulationScores(ArrayList<Heuristic> population) {
 		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
 
 		// Run every heuristic NUMBER_OF_GAMES times and store the average score
 		for (Heuristic heuristic : population) {
 			Integer averageScore = 0;
+            int scoreForOneRound = 0;
+			double[] scores = new double[Constants.NUMBER_OF_GAMES];
 
 			for (int i = 0; i < Constants.NUMBER_OF_GAMES; i++) {
-				averageScore += runGameWithHeuristic(heuristic);
+                scoreForOneRound = runGameWithHeuristic(heuristic);
+			    averageScore += scoreForOneRound;
+				scores[i] = scoreForOneRound;
 			}
 
 			averageScore /= Constants.NUMBER_OF_GAMES;
 
+			if (averageScore > bestAvgScoreOfHeuristic) {
+				bestAvgScoreOfHeuristic = averageScore;
+				System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic + " Weights: "
+                       + heuristic + " with S.D. of " + Helper.round(Helper.calculateSD(scores), 2));
+			}
+
+			if(averageScore > 1000) {
+				writeBuffer(heuristic, averageScore, Helper.calculateSD(scores));
+			}
 			averageScores.put(heuristic, averageScore);
 
+			flushBuffer();
 		}
-
 
 		return averageScores;
 	}
 
+	public static void openBuffer() {
+        try {
+            bw = new BufferedWriter(new FileWriter(pickLogFile()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+	public static void writeBuffer(Heuristic heuristic, Integer averageScore, double sd) {
+        try {
+            bw.write(heuristic.toString() + ", with score of " + averageScore + ", S.D. of " + Helper.round(sd, 2));
+            bw.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void flushBuffer() {
+        try {
+            bw.flush();
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 	public static int runGameWithHeuristic(Heuristic heuristic) {
 		State s = new State();
@@ -187,14 +280,11 @@ public class PlayerSkeleton {
 		double[] motherWeights = mother.getFirst().weights;
 		double[] fatherWeights = father.getFirst().weights;
 
-		if (scoreRatio < 1/4) {
-			numOfWeightsFromMother = (Constants.NUMBER_OF_FEATURES / 4) + 1;
-		} else if (scoreRatio < 3/4) {
-			numOfWeightsFromMother = Constants.NUMBER_OF_FEATURES / 2;
+		if (Constants.REPRODUCE_PROPORTIONATELY) {
+			numOfWeightsFromMother = (int) Math.round(scoreRatio * Constants.NUMBER_OF_FEATURES);
 		} else {
-			numOfWeightsFromMother = (3 * Constants.NUMBER_OF_FEATURES / 4);
+			numOfWeightsFromMother = Constants.NUMBER_OF_FEATURES / 2;
 		}
-
 
 		int[] weightIndexesFromMother = Helper.generateRandomIndices(numOfWeightsFromMother, Constants.NUMBER_OF_FEATURES);
 
@@ -211,5 +301,122 @@ public class PlayerSkeleton {
 		}
 
 		return new Heuristic(childWeights);
+	}
+
+
+	public static Heuristic weightedReproduce(Tuple<Heuristic, Integer> mother, Tuple<Heuristic, Integer> father) {
+		double scoreRatio = mother.getSecond() / father.getSecond();
+		double[] motherWeights = mother.getFirst().weights;
+		double[] fatherWeights = father.getFirst().weights;
+
+
+
+		double[] childWeights = new double[Constants.NUMBER_OF_FEATURES];
+
+		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
+			childWeights[i] = motherWeights[i] * mother.getSecond() + fatherWeights[i] * father.getSecond();
+		}
+
+		return new Heuristic(childWeights);
+	}
+}
+
+class SimulatedAnnealing {
+
+	private double score;
+	private int iteration;
+	private Random random;
+	private BufferedWriter bw;
+
+	public SimulatedAnnealing() throws IOException {
+		score = 0;
+		iteration = 0;
+		random = new Random();
+		bw = new BufferedWriter(new FileWriter("good_5_averages.txt"));
+	}
+
+	public void run() throws IOException {
+		score = PlayerSkeleton.runGameWithHeuristic(getHeuristic());
+		System.out.println(score);
+	}
+
+	public Heuristic getHeuristic() throws IOException {
+		double initialTemperature = calculateInitialTemperature();
+		double temperature = initialTemperature;
+		Heuristic heuristic  = new Heuristic(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
+		while (true) {
+			if (temperature < 1) {
+				System.out.println("Cooled down! The result is obtained.");
+				return heuristic;
+			}
+
+			Heuristic newHeuristic = getNeighbourHeuristic(heuristic);
+			double averageScoreWithOldHeuristic = getAverageScore(heuristic, 5);
+			double averageScoreWithNewHeuristic = getAverageScore(newHeuristic, 5);
+			double improvementFromOlderHeuristic = averageScoreWithNewHeuristic - averageScoreWithOldHeuristic;
+			if (isAccepted(temperature, improvementFromOlderHeuristic)) {
+				heuristic = newHeuristic;
+			}
+
+			temperature = scheduleNewTemperature(initialTemperature, iteration);
+			System.out.println(temperature);
+			System.out.println(heuristic);
+			iteration++;
+		}
+	}
+
+	public double calculateInitialTemperature() {
+		return 500;
+	}
+
+	public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
+		Heuristic newHeuristic = new Heuristic(heuristic.weights);
+		double valueChange = random.nextDouble() - 0.5 ;
+		// The index indicates which weight is changed
+		int index = random.nextInt(9);
+
+		newHeuristic.weights[index] += valueChange;
+
+		if (newHeuristic.weights[index] > 1) {
+			newHeuristic.weights[index] = 1;
+		} else if (newHeuristic.weights[index] < 0) {
+			newHeuristic.weights[index] = 0;
+		}
+
+		return newHeuristic;
+	}
+
+	public boolean isAccepted(double temperature, double improvementFromOlderHeuristic) {
+		double acceptanceProbability = getAcceptanceProbability(temperature, improvementFromOlderHeuristic);
+		if (acceptanceProbability >= random.nextDouble()) {
+			System.out.println("This is called");
+			return true;
+		}
+		return false;
+	}
+
+	public double getAcceptanceProbability(double temperature, double improvementFromOlderHeuristic) {
+		if (improvementFromOlderHeuristic > 0) {
+			return 1.0;
+		} else {
+			return Math.exp((improvementFromOlderHeuristic) / temperature);
+		}
+	}
+
+	public double scheduleNewTemperature(double initialTemperature, int iteration) {
+		double newTemperature = initialTemperature / (1 + Math.log(1 + iteration));
+		return newTemperature;
+	}
+
+	public double getAverageScore(Heuristic heuristic, int rounds) throws IOException {
+		double sum = 0;
+		for (int i = 0; i < rounds; i++) {
+			sum += PlayerSkeleton.runGameWithHeuristic(heuristic);
+		}
+		System.out.println("Score: " + sum / rounds);
+		if (sum / rounds > 2000) {
+			bw.write(heuristic.toString());
+		}
+		return sum / rounds;
 	}
 }
