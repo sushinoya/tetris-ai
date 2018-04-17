@@ -29,6 +29,9 @@ public class PlayerSkeleton {
         for (int i = 0; i < legalMoves.length; i++) {
             PotentialNextState nextState = new PotentialNextState(s);
             nextState.makeMove(legalMoves[i]);
+            if (nextState.hasLost()) {
+            	continue;
+			}
             double currentHeuristicValue = heuristic.getValue(nextState);
             if (currentHeuristicValue < bestHeuristicValue) {
                 bestMove = i;
