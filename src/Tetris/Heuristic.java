@@ -3,6 +3,8 @@ package Tetris;
 import Tetris.Features.*;
 import Tetris.Helper.*;
 
+import java.util.Random;
+
 //this class represents the features and their corresponding weights
 public class Heuristic {
 
@@ -19,19 +21,27 @@ public class Heuristic {
         new NumOfWells()
     };
 
-
-    // Automatically scales the weights such that their sum is Constants.SUM_OF_PROBABILITIES
-    public Heuristic(double... weights) {
-        this.weights = Helper.scaleWeights(weights);
+    public Heuristic() {
+        weights = new double[9];
+        for (int i = 0; i < weights.length; i++) {
+            weights[i] = new Random().nextDouble() * 2 - 1;
+        }
     }
 
+    public Heuristic(double... weights) {
+        this.weights = weights;
+    }
 
     public double getValue(PotentialNextState state) {
+        double normalisingFactor = 0;
         double sum = 0;
         for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
-            sum += features[i].getValue(state) * weights[i];
+            double featureValue = features[i].getValue(state);
+            sum += featureValue * weights[i];
+            normalisingFactor += Math.pow(featureValue, 2);
         }
-        return sum;
+        normalisingFactor = Math.sqrt(normalisingFactor);
+        return sum / normalisingFactor;
     }
 
 

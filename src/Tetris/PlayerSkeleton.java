@@ -39,7 +39,7 @@ public class PlayerSkeleton {
         return bestMove;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		if (Constants.DRAW_ENABLED) {
 			frame = new TFrame(new State());
 		}
@@ -326,22 +326,24 @@ class SimulatedAnnealing {
 	private double score;
 	private int iteration;
 	private Random random;
+	private BufferedWriter bw;
 
-	public SimulatedAnnealing() {
+	public SimulatedAnnealing() throws IOException {
 		score = 0;
 		iteration = 0;
 		random = new Random();
+		bw = new BufferedWriter(new FileWriter("good_5_averages.txt"));
 	}
 
-	public void run() {
+	public void run() throws IOException {
 		score = PlayerSkeleton.runGameWithHeuristic(getHeuristic());
 		System.out.println(score);
 	}
 
-	public Heuristic getHeuristic() {
+	public Heuristic getHeuristic() throws IOException {
 		double initialTemperature = calculateInitialTemperature();
 		double temperature = initialTemperature;
-		Heuristic heuristic  = new Heuristic(8.15, 2.31, 50.41, 11.44, 30.79);
+		Heuristic heuristic  = new Heuristic(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble());
 		while (true) {
 			if (temperature < 1) {
 				System.out.println("Cooled down! The result is obtained.");
@@ -369,15 +371,16 @@ class SimulatedAnnealing {
 
 	public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
 		Heuristic newHeuristic = new Heuristic(heuristic.weights);
-		double valueChange = random.nextDouble() * 5;
-		double sum = Helper.sum(heuristic.weights) + valueChange;
+		double valueChange = random.nextDouble() - 0.5 ;
 		// The index indicates which weight is changed
-		int index = random.nextInt(5);
+		int index = random.nextInt(9);
 
 		newHeuristic.weights[index] += valueChange;
 
-		for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
-			newHeuristic.weights[i] = newHeuristic.weights[i] * 100 / sum;
+		if (newHeuristic.weights[index] > 1) {
+			newHeuristic.weights[index] = 1;
+		} else if (newHeuristic.weights[index] < 0) {
+			newHeuristic.weights[index] = 0;
 		}
 
 		return newHeuristic;
@@ -405,12 +408,15 @@ class SimulatedAnnealing {
 		return newTemperature;
 	}
 
-	public double getAverageScore(Heuristic heuristic, int rounds) {
+	public double getAverageScore(Heuristic heuristic, int rounds) throws IOException {
 		double sum = 0;
 		for (int i = 0; i < rounds; i++) {
 			sum += PlayerSkeleton.runGameWithHeuristic(heuristic);
 		}
 		System.out.println("Score: " + sum / rounds);
+		if (sum / rounds > 2000) {
+			bw.write(heuristic.toString());
+		}
 		return sum / rounds;
 	}
 }
