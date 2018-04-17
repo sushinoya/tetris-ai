@@ -20,7 +20,7 @@ public class Heuristic {
     };
 
 
-    // Automatically scales the weights such that their sum is Constants.SUM_OF_PROBABILITIES
+    // Automatically scales the weights such that their the weights are normalised
     public Heuristic(double... weights) {
         this.weights = Helper.scaleWeights(weights);
     }

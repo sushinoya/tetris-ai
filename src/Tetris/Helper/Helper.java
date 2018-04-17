@@ -24,9 +24,9 @@ public class Helper {
 
         double sumOfWeights =  Helper.sum(Arrays.stream(unscaledWeights).map(x -> Math.pow(x, 2)).toArray());
         double normalisingFactor = Math.sqrt(sumOfWeights);
+        double[] normalised = Arrays.stream(unscaledWeights).map(x -> x / normalisingFactor).toArray();
 
-        return Arrays.stream(unscaledWeights).map(x -> x / normalisingFactor).toArray();
-
+        return normalised;
     }
 
     // Old scaled weight function
@@ -74,8 +74,8 @@ public class Helper {
 
 
     // Sums the values in an ArrayList<T>
-    public static int sum(double[] arr) {
-        int sum = 0;
+    public static double sum(double[] arr) {
+        double sum = 0;
         for (double i: arr) {
             sum += i;
         }
