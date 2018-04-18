@@ -23,7 +23,7 @@ public class SimulatedAnnealing {
     public Heuristic getHeuristic() {
         double initialTemperature = calculateInitialTemperature();
         double temperature = initialTemperature;
-        Heuristic heuristic  = new Heuristic(8.15, 2.31, 50.41, 11.44, 30.79);
+        Heuristic heuristic  = new Heuristic(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1);
         while (true) {
             if (temperature < 1) {
                 System.out.println("Cooled down! The result is obtained.");
@@ -51,18 +51,13 @@ public class SimulatedAnnealing {
 
     public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
         Heuristic newHeuristic = new Heuristic(heuristic.weights);
-        double valueChange = random.nextDouble() * 5;
-        double sum = Helper.sum(heuristic.weights) + valueChange;
+        double valueChange = random.nextDouble() * 2 - 1;
         // The index indicates which weight is changed
-        int index = random.nextInt(5);
+        int index = random.nextInt(Constants.NUMBER_OF_FEATURES);
 
-        newHeuristic.weights[index] += valueChange;
+        newHeuristic.weights[index] = newHeuristic.weights[index] * (1 + valueChange);
 
-        for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
-            newHeuristic.weights[i] = newHeuristic.weights[i] * 100 / sum;
-        }
-
-        return newHeuristic;
+        return new Heuristic(newHeuristic.weights);
     }
 
     public boolean isAccepted(double temperature, double improvementFromOlderHeuristic) {
