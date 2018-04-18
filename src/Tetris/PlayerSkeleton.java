@@ -107,6 +107,33 @@ public class PlayerSkeleton {
 			}
 		}
 
+		if(Constants.TOURNAMENT_SELECT) {
+		    double sampleSize = Constants.TOURNAMENT_SELECT_PARTITION_SIZE * Constants.NUMBER_OF_HEURISTICS;
+
+            ArrayList<Heuristic> sortedSamplePopulation
+                    = getSortedPopulation(getRandomSamplePopulation(populationWithScores, sampleSize));
+
+            Heuristic best = sortedSamplePopulation.get(0);
+            Heuristic better = sortedSamplePopulation.get(1);
+
+            Tuple<Heuristic, Integer> mother =
+                    new Tuple<Heuristic, Integer>(best, populationWithScores.get(best));
+            Tuple<Heuristic, Integer> father =
+                    new Tuple<Heuristic, Integer>(better, populationWithScores.get(better));
+
+            Heuristic child;
+            if (Constants.USE_WEIGHTED_REPRODUCE) {
+                child = weightedReproduce(mother, father);
+
+            } else {
+                child = reproduce(mother, father);
+            }
+
+            // Add the elitist child
+            newPopulation.add(child);
+
+		}
+
 		for (int i = 0; i < numberOfChildrenToGenerate; i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
@@ -190,26 +217,51 @@ public class PlayerSkeleton {
 		return averageScores;
 	}
 
+
+    // Gets a random sample of the population given the sample size
+	public static ArrayList<Map.Entry<Heuristic, Integer>> getRandomSamplePopulation(HashMap<Heuristic, Integer> population, double sampleSize) {
+
+	    Random rand = new Random();
+	    ArrayList<Map.Entry<Heuristic, Integer>> populationList = new ArrayList<Map.Entry<Heuristic, Integer>>(population.entrySet());
+
+	    ArrayList<Map.Entry<Heuristic, Integer>> randomSamplePopulationList =
+                new ArrayList<Map.Entry<Heuristic, Integer>>();
+
+        for(int i = 0; i < sampleSize; i++) {
+            randomSamplePopulationList.add(populationList.get(rand.nextInt(populationList.size() - 1)));
+        }
+
+        return randomSamplePopulationList;
+    }
+
+
 	// Sort population based on score of individual
 	public static ArrayList<Heuristic> getSortedPopulation(HashMap<Heuristic, Integer> population) {
 
 		ArrayList<Map.Entry<Heuristic, Integer>> populationList = new ArrayList<Map.Entry<Heuristic, Integer>>(population.entrySet());
 
-		Collections.sort(populationList, new Comparator<Map.Entry<Heuristic, Integer>>() {
-			@Override
-			public int compare(Map.Entry<Heuristic, Integer> o1, Map.Entry<Heuristic, Integer> o2) {
-				return o2.getValue().compareTo(o1.getValue());
-			}
-		});
-
-		ArrayList<Heuristic> sortedPopulation = new ArrayList<Heuristic>();
-		for (Map.Entry<Heuristic, Integer> individual : populationList) {
-			sortedPopulation.add(individual.getKey());
-		}
-
-		return sortedPopulation;
+		return getSortedPopulation(populationList);
 
 	}
+
+    //Overload
+	public static ArrayList<Heuristic> getSortedPopulation(ArrayList<Map.Entry<Heuristic, Integer>> populationList){
+
+        Collections.sort(populationList, new Comparator<Map.Entry<Heuristic, Integer>>() {
+            @Override
+            public int compare(Map.Entry<Heuristic, Integer> o1, Map.Entry<Heuristic, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+
+        ArrayList<Heuristic> sortedPopulation = new ArrayList<Heuristic>();
+        for (Map.Entry<Heuristic, Integer> individual : populationList) {
+            sortedPopulation.add(individual.getKey());
+        }
+
+        return sortedPopulation;
+
+    }
 
 	public static void openBuffer() {
         try {
