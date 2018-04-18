@@ -1,8 +1,6 @@
 package Tetris;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.lang.*;
 
@@ -42,7 +40,7 @@ public class PlayerSkeleton {
         return bestMove;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException, ClassNotFoundException{
 		if (Constants.DRAW_ENABLED) {
 			frame = new TFrame(new State());
 		}
@@ -66,16 +64,55 @@ public class PlayerSkeleton {
 		}
 	}
 
+	public static ArrayList<Heuristic> getHeuristicsForGeneticFunction()  throws IOException, ClassNotFoundException {
+
+		if (Constants.READ_POPULATION_FROM_FILE) {
+			FileInputStream fileInputStream = new FileInputStream("data.txt");
+			ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+
+			ArrayList<Heuristic> population = (ArrayList<Heuristic>) objectInputStream.readObject();
+			if(population.size() < Constants.NUMBER_OF_HEURISTICS) { //if not enough from file, make some random heuristics and add on to it
+				ArrayList<Heuristic> additionalPopulation =
+						Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS - population.size());
+				population.addAll(additionalPopulation);
+			} else if (population.size() > Constants.NUMBER_OF_HEURISTICS) { //if too much from file, take the number of heuristics we need from the file
+				return (ArrayList<Heuristic>) population.subList(0, Constants.NUMBER_OF_HEURISTICS);
+			}
+
+			return population;
+		} else {
+			return generateRandomHeuristics();
+		}
+	}
+
+	public static ObjectOutputStream openObjOutputStream() throws IOException {
+		FileOutputStream fileOutputStream
+				= new FileOutputStream("data.txt");
+		ObjectOutputStream objectOutputStream
+				= new ObjectOutputStream(fileOutputStream);
+		return objectOutputStream;
+	}
+
+	public static ArrayList<Heuristic> generateRandomHeuristics() {
+		ArrayList<Heuristic> population = Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
+		return population;
+	}
+
 	// Simulates the replacement of the population by its member's descendants
-	public static void geneticFunction() {
+	public static void geneticFunction()  throws IOException, ClassNotFoundException {
 	    int gen = 0;
 
-		ArrayList<Heuristic> population = Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS);
+	    //TODO: I PUT THIS AS TODO COS IT WILL CHANGE THE COLOUR. SO READ THE FOLLOWING OKAY!!!!!!!!
+		// Constants.READ_POPULATION_FROM_FILE decides if you want to read your population from the file data.txt
+		// or you want to start from scratch.
+
+		ArrayList<Heuristic> population = getHeuristicsForGeneticFunction();
+
 		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
             System.out.println("\nCollecting score for generation " + gen + "..." );
 
             HashMap<Heuristic, Integer> populationWithAverageScores = getPopulationScores(population);
-
+			ObjectOutputStream objectOutputStream = openObjOutputStream();
             System.out.println("Done collecting for generation " + gen + ".\n" );
 
 			double populationAverage = Helper.sum(populationWithAverageScores.values()) / Constants.NUMBER_OF_HEURISTICS;
@@ -84,6 +121,8 @@ public class PlayerSkeleton {
             gen++;
 
             population = generateNextGeneration(populationWithAverageScores);
+			objectOutputStream.writeObject(population);
+			objectOutputStream.flush();
 		}
 	}
 
@@ -94,7 +133,20 @@ public class PlayerSkeleton {
 		ArrayList<Heuristic> newPopulation = new ArrayList<Heuristic>();
 		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
 
-		for (int i = 0; i < populationWithScores.size(); i++) {
+		long numberOfChildrenToGenerate = populationWithScores.size();
+
+		if (Constants.RETAIN_PARENTS) {
+			numberOfChildrenToGenerate = Math.round(numberOfChildrenToGenerate * (1 - Constants.FRACTION_OF_RETAINED_PARENTS));
+
+			ArrayList<Heuristic> sortedPopulation = getSortedPopulation(populationWithScores);
+
+			// Retain percentage of fittest in population
+			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS; i++) {
+				newPopulation.add(sortedPopulation.get(i));
+			}
+		}
+
+		for (int i = 0; i < numberOfChildrenToGenerate; i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
 
@@ -175,6 +227,27 @@ public class PlayerSkeleton {
 		}
 
 		return averageScores;
+	}
+
+	// Sort population based on score of individual
+	public static ArrayList<Heuristic> getSortedPopulation(HashMap<Heuristic, Integer> population) {
+
+		ArrayList<Map.Entry<Heuristic, Integer>> populationList = new ArrayList<Map.Entry<Heuristic, Integer>>(population.entrySet());
+
+		Collections.sort(populationList, new Comparator<Map.Entry<Heuristic, Integer>>() {
+			@Override
+			public int compare(Map.Entry<Heuristic, Integer> o1, Map.Entry<Heuristic, Integer> o2) {
+				return o2.getValue().compareTo(o1.getValue());
+			}
+		});
+
+		ArrayList<Heuristic> sortedPopulation = new ArrayList<Heuristic>();
+		for (Map.Entry<Heuristic, Integer> individual : populationList) {
+			sortedPopulation.add(individual.getKey());
+		}
+
+		return sortedPopulation;
+
 	}
 
 	public static void openBuffer() {
