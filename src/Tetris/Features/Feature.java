@@ -2,7 +2,9 @@ package Tetris.Features;
 
 import Tetris.PotentialNextState;
 
-public abstract class Feature {
+import java.io.Serializable;
+
+public abstract class Feature implements Serializable{
 
     public abstract double getValue(PotentialNextState state);
 

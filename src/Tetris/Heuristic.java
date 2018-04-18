@@ -3,8 +3,10 @@ package Tetris;
 import Tetris.Features.*;
 import Tetris.Helper.*;
 
+import java.io.Serializable;
+
 //this class represents the features and their corresponding weights
-public class Heuristic {
+public class Heuristic implements Serializable{
 
     double[] weights;
     public static Feature[] features = {
@@ -16,7 +18,8 @@ public class Heuristic {
         new NumOfRowsCleared(),
         new NumOfBlocksAboveHolesFeature(),
         new SumOfDepthOfHoles(),
-        new NumOfWells()
+        new NumOfWells(),
+        new AggregateHeightFeature()
     };
 
 
