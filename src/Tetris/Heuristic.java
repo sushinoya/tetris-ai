@@ -16,7 +16,8 @@ public class Heuristic {
         new NumOfRowsCleared(),
         new NumOfBlocksAboveHolesFeature(),
         new SumOfDepthOfHoles(),
-        new NumOfWells()
+        new NumOfWells(),
+        new AggregateHeightFeature()
     };
 
 
