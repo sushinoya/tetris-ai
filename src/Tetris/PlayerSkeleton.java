@@ -67,12 +67,19 @@ public class PlayerSkeleton {
 	public static ArrayList<Heuristic> getHeuristicsForGeneticFunction()  throws IOException, ClassNotFoundException {
 
 		if (Constants.READ_POPULATION_FROM_FILE) {
-			FileInputStream fileInputStream
-					= new FileInputStream("data.txt");
-			ObjectInputStream objectInputStream
-					= new ObjectInputStream(fileInputStream);
+			FileInputStream fileInputStream = new FileInputStream("data.txt");
+			ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
 
-			return (ArrayList<Heuristic>) objectInputStream.readObject();
+			ArrayList<Heuristic> population = (ArrayList<Heuristic>) objectInputStream.readObject();
+			if(population.size() < Constants.NUMBER_OF_HEURISTICS) { //if not enough from file, make some random heuristics and add on to it
+				ArrayList<Heuristic> additionalPopulation =
+						Helper.getRandomHeuristics(Constants.NUMBER_OF_HEURISTICS - population.size());
+				population.addAll(additionalPopulation);
+			} else if (population.size() > Constants.NUMBER_OF_HEURISTICS) { //if too much from file, take the number of heuristics we need from the file
+				return (ArrayList<Heuristic>) population.subList(0, Constants.NUMBER_OF_HEURISTICS);
+			}
+
+			return population;
 		} else {
 			return generateRandomHeuristics();
 		}
@@ -95,8 +102,10 @@ public class PlayerSkeleton {
 	public static void geneticFunction()  throws IOException, ClassNotFoundException {
 	    int gen = 0;
 
-	    //READ: Constants.READ_POPULATION_FROM_FILE decides if you want to read your population from the file data.txt
+	    //TODO: I PUT THIS AS TODO COS IT WILL CHANGE THE COLOUR. SO READ THE FOLLOWING OKAY!!!!!!!!
+		// Constants.READ_POPULATION_FROM_FILE decides if you want to read your population from the file data.txt
 		// or you want to start from scratch.
+
 		ArrayList<Heuristic> population = getHeuristicsForGeneticFunction();
 
 		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
