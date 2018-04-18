@@ -177,6 +177,27 @@ public class PlayerSkeleton {
 		return averageScores;
 	}
 
+	// Sort population based on score of individual
+	public static ArrayList<Heuristic> getSortedPopulation(HashMap<Heuristic, Integer> population) {
+
+		ArrayList<Map.Entry<Heuristic, Integer>> populationList = new ArrayList<Map.Entry<Heuristic, Integer>>(population.entrySet());
+
+		Collections.sort(populationList, new Comparator<Map.Entry<Heuristic, Integer>>() {
+			@Override
+			public int compare(Map.Entry<Heuristic, Integer> o1, Map.Entry<Heuristic, Integer> o2) {
+				return o1.getValue().compareTo(o2.getValue());
+			}
+		});
+
+		ArrayList<Heuristic> sortedPopulation = new ArrayList<Heuristic>();
+		for (Map.Entry<Heuristic, Integer> individual : populationList) {
+			sortedPopulation.add(individual.getKey());
+		}
+
+		return sortedPopulation;
+
+	}
+
 	public static void openBuffer() {
         try {
             bw = new BufferedWriter(new FileWriter(pickLogFile()));
