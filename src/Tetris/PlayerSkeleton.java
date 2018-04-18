@@ -133,7 +133,20 @@ public class PlayerSkeleton {
 		ArrayList<Heuristic> newPopulation = new ArrayList<Heuristic>();
 		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
 
-		for (int i = 0; i < populationWithScores.size(); i++) {
+		long numberOfChildrenToGenerate = populationWithScores.size();
+
+		if (Constants.RETAIN_PARENTS) {
+			numberOfChildrenToGenerate = Math.round(numberOfChildrenToGenerate * (1 - Constants.FRACTION_OF_RETAINED_PARENTS));
+
+			ArrayList<Heuristic> sortedPopulation = getSortedPopulation(populationWithScores);
+
+			// Retain percentage of fittest in population
+			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS; i++) {
+				newPopulation.add(sortedPopulation.get(i));
+			}
+		}
+
+		for (int i = 0; i < numberOfChildrenToGenerate; i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
 
@@ -214,6 +227,27 @@ public class PlayerSkeleton {
 		}
 
 		return averageScores;
+	}
+
+	// Sort population based on score of individual
+	public static ArrayList<Heuristic> getSortedPopulation(HashMap<Heuristic, Integer> population) {
+
+		ArrayList<Map.Entry<Heuristic, Integer>> populationList = new ArrayList<Map.Entry<Heuristic, Integer>>(population.entrySet());
+
+		Collections.sort(populationList, new Comparator<Map.Entry<Heuristic, Integer>>() {
+			@Override
+			public int compare(Map.Entry<Heuristic, Integer> o1, Map.Entry<Heuristic, Integer> o2) {
+				return o2.getValue().compareTo(o1.getValue());
+			}
+		});
+
+		ArrayList<Heuristic> sortedPopulation = new ArrayList<Heuristic>();
+		for (Map.Entry<Heuristic, Integer> individual : populationList) {
+			sortedPopulation.add(individual.getKey());
+		}
+
+		return sortedPopulation;
+
 	}
 
 	public static void openBuffer() {
