@@ -140,37 +140,38 @@ public class PlayerSkeleton {
 
 			ArrayList<Heuristic> sortedPopulation = getSortedPopulation(populationWithScores);
 
-			// Retain percentage of fittest in population
-			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS; i++) {
-				newPopulation.add(sortedPopulation.get(i));
-			}
-		}
 
-		if(Constants.TOURNAMENT_SELECT) {
-		    double sampleSize = Constants.TOURNAMENT_SELECT_PARTITION_SIZE * Constants.NUMBER_OF_HEURISTICS;
+            if(Constants.TOURNAMENT_SELECTION) {
+                double sampleSize = Constants.TOURNAMENT_SELECT_PARTITION_SIZE * Constants.NUMBER_OF_HEURISTICS;
 
-            ArrayList<Heuristic> sortedSamplePopulation
-                    = getSortedPopulation(getRandomSamplePopulation(populationWithScores, sampleSize));
+                ArrayList<Heuristic> sortedSamplePopulation
+                        = getSortedPopulation(getRandomSamplePopulation(populationWithScores, sampleSize));
 
-            Heuristic best = sortedSamplePopulation.get(0);
-            Heuristic better = sortedSamplePopulation.get(1);
+                Heuristic best = sortedSamplePopulation.get(0);
+                Heuristic better = sortedSamplePopulation.get(1);
 
-            Tuple<Heuristic, Integer> mother =
-                    new Tuple<Heuristic, Integer>(best, populationWithScores.get(best));
-            Tuple<Heuristic, Integer> father =
-                    new Tuple<Heuristic, Integer>(better, populationWithScores.get(better));
+                Tuple<Heuristic, Integer> mother =
+                        new Tuple<Heuristic, Integer>(best, populationWithScores.get(best));
+                Tuple<Heuristic, Integer> father =
+                        new Tuple<Heuristic, Integer>(better, populationWithScores.get(better));
 
-            Heuristic child;
-            if (Constants.USE_WEIGHTED_REPRODUCE) {
-                child = weightedReproduce(mother, father);
+                Heuristic child;
+                if (Constants.USE_WEIGHTED_REPRODUCE) {
+                    child = weightedReproduce(mother, father);
 
-            } else {
-                child = reproduce(mother, father);
+                } else {
+                    child = reproduce(mother, father);
+                }
+
+                // Add the elitist child
+                newPopulation.add(child);
+
             }
 
-            // Add the elitist child
-            newPopulation.add(child);
-
+			// Retain percentage of fittest in population
+			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS - 1; i++) {
+				newPopulation.add(sortedPopulation.get(i));
+			}
 		}
 
 		for (int i = 0; i < numberOfChildrenToGenerate; i++) {

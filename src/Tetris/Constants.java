@@ -2,14 +2,16 @@ package Tetris;
 
 public final class Constants {
 
-    public final static int NUMBER_OF_GAMES = 5;
-    public final static int NUMBER_OF_HEURISTICS = 500;
+    public final static int NUMBER_OF_GAMES = 3;
+    public final static int NUMBER_OF_HEURISTICS = 300;
     public final static int SUM_OF_PROBABILITIES = 100;
     public final static int NUMBER_OF_GENERATIONS = 100;
     public final static double PROBABILITY_OF_MUTATION = 0.05;
     public final static double MAX_MUTATION_CHANGE = 0.2;
     public final static int NUMBER_OF_FEATURES = Heuristic.features.length;
     public final static boolean DRAW_ENABLED = false;
+    public final static boolean TOURNAMENT_SELECTION = true;
+    public final static double TOURNAMENT_SELECT_PARTITION_SIZE = 0.1;
     public final static boolean ALLOW_MASTURBATION_REPRODUCTION = false;
     public final static boolean RETAIN_PARENTS = true;
     public final static double FRACTION_OF_RETAINED_PARENTS = 0.3;
