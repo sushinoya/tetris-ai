@@ -96,13 +96,13 @@ public class PlayerSkeleton {
 
 		long numberOfChildrenToGenerate = populationWithScores.size();
 
-		if (Constants.SYSTEMIC_ELITISM) {
-			numberOfChildrenToGenerate = Math.round(numberOfChildrenToGenerate * (1 - Constants.DEGREE_OF_ELITISM));
+		if (Constants.RETAIN_PARENTS) {
+			numberOfChildrenToGenerate = Math.round(numberOfChildrenToGenerate * (1 - Constants.FRACTION_OF_RETAINED_PARENTS));
 
 			ArrayList<Heuristic> sortedPopulation = getSortedPopulation(populationWithScores);
 
 			// Retain percentage of fittest in population
-			for (int i = 0; i < Constants.DEGREE_OF_ELITISM * Constants.NUMBER_OF_HEURISTICS; i++) {
+			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS; i++) {
 				newPopulation.add(sortedPopulation.get(i));
 			}
 		}
