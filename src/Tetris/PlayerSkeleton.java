@@ -140,10 +140,21 @@ public class PlayerSkeleton {
 
 			ArrayList<Heuristic> sortedPopulation = getSortedPopulation(populationWithScores);
 
+			// Retain percentage of fittest in population
+			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS - 1; i++) {
+				newPopulation.add(sortedPopulation.get(i));
+			}
+		}
 
-            if(Constants.TOURNAMENT_SELECTION) {
-                double sampleSize = Constants.TOURNAMENT_SELECT_PARTITION_SIZE * Constants.NUMBER_OF_HEURISTICS;
 
+        if(Constants.TOURNAMENT_SELECTION) {
+            double sampleSize = Constants.TOURNAMENT_SELECT_SAMPLE_PERCENTAGE * Constants.NUMBER_OF_HEURISTICS;
+            double numberOfElitistChildrenToGenerate = Math.round(Constants.NUMBER_OF_HEURISTICS
+                    * Constants.TOURNAMENT_SELECT_CHILD_PERCENTAGE_TO_GENERATE);
+
+            numberOfChildrenToGenerate -= numberOfElitistChildrenToGenerate;
+
+            for(int i = 0; i < numberOfElitistChildrenToGenerate; i++) {
                 ArrayList<Heuristic> sortedSamplePopulation
                         = getSortedPopulation(getRandomSamplePopulation(populationWithScores, sampleSize));
 
@@ -165,14 +176,8 @@ public class PlayerSkeleton {
 
                 // Add the elitist child
                 newPopulation.add(child);
-
             }
-
-			// Retain percentage of fittest in population
-			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS - 1; i++) {
-				newPopulation.add(sortedPopulation.get(i));
-			}
-		}
+        }
 
 		for (int i = 0; i < numberOfChildrenToGenerate; i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
