@@ -130,51 +130,79 @@ public class PlayerSkeleton {
 	// Creates NUMBER_OF_HEURISTICS new children from the current population and returns this new population.
 	// The probability of two heuristics procreating is proportional to the average score they generated.
 	public static ArrayList<Heuristic> generateNextGeneration(HashMap<Heuristic, Integer> populationWithScores) {
-		ArrayList<Heuristic> newPopulation = new ArrayList<Heuristic>();
-		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
-
-		long numberOfChildrenToGenerate = populationWithScores.size();
-
-		if (Constants.RETAIN_PARENTS) {
-			numberOfChildrenToGenerate = Math.round(numberOfChildrenToGenerate * (1 - Constants.FRACTION_OF_RETAINED_PARENTS));
-
-			ArrayList<Heuristic> sortedPopulation = getSortedPopulation(populationWithScores);
-
-			// Retain percentage of fittest in population
-			for (int i = 0; i < Constants.FRACTION_OF_RETAINED_PARENTS * Constants.NUMBER_OF_HEURISTICS; i++) {
-				newPopulation.add(sortedPopulation.get(i));
-			}
+		Random random = new Random();
+		ArrayList<Heuristic> children = new ArrayList<>();
+		ArrayList<Tuple<Heuristic, Integer>> populationListWithScores = new ArrayList<>();
+		for (Heuristic heuristic : populationWithScores.keySet()) {
+			populationListWithScores.add(new Tuple<Heuristic, Integer>(heuristic, populationWithScores.get(heuristic)));
 		}
 
-		for (int i = 0; i < numberOfChildrenToGenerate; i++) {
-			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
-			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
+		HashSet<Integer> hasBeenSelected = new HashSet<>();
+		ArrayList<Tuple<Heuristic, Integer>> tournamentPlayers = new ArrayList<>();
 
-			if (!Constants.ALLOW_MASTURBATION_REPRODUCTION) {
-				while (mother.getFirst().equals(father.getFirst())) {
-					father = randomSelect(populationWithScores, heuristicsAndIntervals);
+		for (int round = 0; round < 300; round++) {
+			while (tournamentPlayers.size() < 100) {
+				int index = random.nextInt(1000);
+				if (hasBeenSelected.contains(index)) {
+					continue;
 				}
+				hasBeenSelected.add(index);
+				tournamentPlayers.add(populationListWithScores.get(index));
 			}
 
+			ArrayList<Tuple<Heuristic, Integer>> bestTwo = getBestTwo(tournamentPlayers);
 
 			Heuristic child;
 			if (Constants.USE_WEIGHTED_REPRODUCE) {
-				child = weightedReproduce(mother, father);
+				child = weightedReproduce(bestTwo.get(0), bestTwo.get(1));
 
 			} else {
-				child = reproduce(mother, father);
+				child = reproduce(bestTwo.get(0), bestTwo.get(1));
 			}
 
-			// Mutate child
-			child = mutate(child);
-
-			// Add lines to mimic random mutation
-			newPopulation.add(child);
+			children.add(child);
+			tournamentPlayers.clear();
+			hasBeenSelected.clear();
 		}
 
-		return newPopulation;
+		for (Heuristic child : children) {
+			// Mutate child
+			child = mutate(child);
+		}
+
+		populationListWithScores.sort(Comparator.comparing((Tuple<Heuristic, Integer> tuple) -> tuple.getSecond()).reversed());
+		for (int i = 0; i < 700; i++) {
+			children.add(populationListWithScores.get(i).getFirst());
+		}
+
+		return children;
 	}
 
+	public static ArrayList<Tuple<Heuristic, Integer>> getBestTwo(ArrayList<Tuple<Heuristic, Integer>> tournamentPlayers) {
+		Tuple<Heuristic, Integer> theBest = tournamentPlayers.get(0);
+		Tuple<Heuristic, Integer> theSecondBest = tournamentPlayers.get(1);
+
+		if (theBest.getSecond() < theSecondBest.getSecond()) {
+			Tuple<Heuristic, Integer> temp = theBest;
+			theBest = theSecondBest;
+			theSecondBest = temp;
+		}
+
+		for (int i = 2; i < tournamentPlayers.size(); i++) {
+			if (tournamentPlayers.get(i).getSecond() > theBest.getSecond()) {
+				theSecondBest = theBest;
+				theBest = tournamentPlayers.get(i);
+			} else if (tournamentPlayers.get(i).getSecond() > theSecondBest.getSecond()) {
+				theSecondBest = tournamentPlayers.get(i);
+			}
+		}
+
+		ArrayList<Tuple<Heuristic, Integer>> theBestTwo = new ArrayList<>();
+		theBestTwo.add(theBest);
+		theBestTwo.add(theSecondBest);
+
+		return theBestTwo;
+	}
 
 	public static Heuristic mutate(Heuristic heuristic) {
 
