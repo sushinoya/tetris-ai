@@ -198,7 +198,7 @@ public class PlayerSkeleton {
 		Collections.sort(populationList, new Comparator<Map.Entry<Heuristic, Integer>>() {
 			@Override
 			public int compare(Map.Entry<Heuristic, Integer> o1, Map.Entry<Heuristic, Integer> o2) {
-				return o1.getValue().compareTo(o2.getValue());
+				return o2.getValue().compareTo(o1.getValue());
 			}
 		});
 
