@@ -94,7 +94,20 @@ public class PlayerSkeleton {
 		ArrayList<Heuristic> newPopulation = new ArrayList<Heuristic>();
 		Tuple<ArrayList<Heuristic>, ArrayList<Integer>> heuristicsAndIntervals = generateProbabilityIntervalList(populationWithScores);
 
-		for (int i = 0; i < populationWithScores.size(); i++) {
+		long numberOfChildrenToGenerate = populationWithScores.size();
+
+		if (Constants.SYSTEMIC_ELITISM) {
+			numberOfChildrenToGenerate = Math.round(numberOfChildrenToGenerate * (1 - Constants.DEGREE_OF_ELITISM));
+
+			ArrayList<Heuristic> sortedPopulation = getSortedPopulation(populationWithScores);
+
+			// Retain percentage of fittest in population
+			for (int i = 0; i < Constants.DEGREE_OF_ELITISM * Constants.NUMBER_OF_HEURISTICS; i++) {
+				newPopulation.add(sortedPopulation.get(i));
+			}
+		}
+
+		for (int i = 0; i < numberOfChildrenToGenerate; i++) {
 			Tuple<Heuristic, Integer> mother = randomSelect(populationWithScores, heuristicsAndIntervals);
 			Tuple<Heuristic, Integer> father = randomSelect(populationWithScores, heuristicsAndIntervals);
 
