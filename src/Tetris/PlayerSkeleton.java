@@ -1,7 +1,6 @@
 package Tetris;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.lang.*;
 
@@ -133,14 +132,14 @@ public class PlayerSkeleton {
 	public static ArrayList<Heuristic> generateNextGeneration(HashMap<Heuristic, Integer> populationWithScores) {
 		ArrayList<Tuple<Heuristic, Integer>> populationListWithScores = new ArrayList<>();
 		for (Heuristic heuristic : populationWithScores.keySet()) {
-			populationListWithScores.add(new Tuple<Heuristic, Integer>(heuristic, populationWithScores.get(heuristic)));
+			populationListWithScores.add(new Tuple<>(heuristic, populationWithScores.get(heuristic)));
 		}
 
 		ArrayList<Heuristic> children = getChildren(populationListWithScores);
 
 		for (Heuristic child : children) {
 			// Mutate child
-			child = mutate(child);
+			mutate(child);
 		}
 
 		populationListWithScores.sort(Comparator.comparing((Tuple<Heuristic, Integer> tuple) -> tuple.getSecond()).reversed());
@@ -164,6 +163,8 @@ public class PlayerSkeleton {
 	public static Heuristic getAChild(ArrayList<Tuple<Heuristic, Integer>> populationListWithScores) {
 		Random random = new Random();
 		HashSet<Integer> hasBeenSelected = new HashSet<>();
+
+		// Select 10% of the population as the tournament players
 		ArrayList<Tuple<Heuristic, Integer>> tournamentPlayers = new ArrayList<>();
 		while (tournamentPlayers.size() < 0.1 * Constants.NUMBER_OF_HEURISTICS) {
 			int index = random.nextInt(Constants.NUMBER_OF_HEURISTICS);
@@ -179,7 +180,6 @@ public class PlayerSkeleton {
 		Heuristic child;
 		if (Constants.USE_WEIGHTED_REPRODUCE) {
 			child = weightedReproduce(bestTwo.get(0), bestTwo.get(1));
-
 		} else {
 			child = reproduce(bestTwo.get(0), bestTwo.get(1));
 		}
