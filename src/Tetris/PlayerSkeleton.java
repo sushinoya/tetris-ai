@@ -1,6 +1,7 @@
 package Tetris;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.lang.*;
 
@@ -129,56 +130,95 @@ public class PlayerSkeleton {
 
 	// Creates NUMBER_OF_HEURISTICS new children from the current population and returns this new population.
 	// The probability of two heuristics procreating is proportional to the average score they generated.
+//	public static ArrayList<Heuristic> generateNextGeneration(HashMap<Heuristic, Integer> populationWithScores) {
+//		Random random = new Random();
+//		ArrayList<Heuristic> children = new ArrayList<>();
+//		ArrayList<Tuple<Heuristic, Integer>> populationListWithScores = new ArrayList<>();
+//		for (Heuristic heuristic : populationWithScores.keySet()) {
+//			populationListWithScores.add(new Tuple<>(heuristic, populationWithScores.get(heuristic)));
+//		}
+//
+//		HashSet<Integer> hasBeenSelected = new HashSet<>();
+//		ArrayList<Tuple<Heuristic, Integer>> tournamentPlayers = new ArrayList<>();
+//
+//		for (int round = 0; round < 300; round++) {
+//			while (tournamentPlayers.size() < 100) {
+//				int index = random.nextInt(1000);
+//				if (hasBeenSelected.contains(index)) {
+//					continue;
+//				}
+//				hasBeenSelected.add(index);
+//				tournamentPlayers.add(populationListWithScores.get(index));
+//			}
+//
+//			ArrayList<Tuple<Heuristic, Integer>> bestTwo = getBestTwo(tournamentPlayers);
+//
+//			Heuristic child;
+//			if (Constants.USE_WEIGHTED_REPRODUCE) {
+//				child = weightedReproduce(bestTwo.get(0), bestTwo.get(1));
+//
+//			} else {
+//				child = reproduce(bestTwo.get(0), bestTwo.get(1));
+//			}
+//
+//			children.add(child);
+//			tournamentPlayers.clear();
+//			hasBeenSelected.clear();
+//		}
+//
+//		for (Heuristic child : children) {
+//			// Mutate child
+//			child = mutate(child);
+//		}
+//
+//		populationListWithScores.sort(Comparator.comparing((Tuple<Heuristic, Integer> tuple) -> tuple.getSecond()).reversed());
+//		for (int i = 0; i < 700; i++) {
+//			children.add(populationListWithScores.get(i).getFirst());
+//		}
+//
+//		return children;
+//	}
+
+
 	public static ArrayList<Heuristic> generateNextGeneration(HashMap<Heuristic, Integer> populationWithScores) {
-		Random random = new Random();
-		ArrayList<Heuristic> children = new ArrayList<>();
-		ArrayList<Tuple<Heuristic, Integer>> populationListWithScores = new ArrayList<>();
-		for (Heuristic heuristic : populationWithScores.keySet()) {
-			populationListWithScores.add(new Tuple<Heuristic, Integer>(heuristic, populationWithScores.get(heuristic)));
+
+		int numOfHeuristicsToCopyToNewGen = (int) (Constants.NUMBER_OF_HEURISTICS * Constants.PERCENTAGE_OF_POPULATION_RETAINED);
+		ArrayList<Heuristic> chlidren = (ArrayList<Heuristic>) getSortedPopulation(populationWithScores).subList(0, numOfHeuristicsToCopyToNewGen);
+
+
+		int numOfBabiesToMake = Constants.NUMBER_OF_HEURISTICS - numOfHeuristicsToCopyToNewGen;
+
+		// Make babies
+		for (int i = 0; i < numOfBabiesToMake; i++) {
+			chlidren.add(makeBaby(populationWithScores));
 		}
 
-		HashSet<Integer> hasBeenSelected = new HashSet<>();
-		ArrayList<Tuple<Heuristic, Integer>> tournamentPlayers = new ArrayList<>();
-
-		for (int round = 0; round < 300; round++) {
-			while (tournamentPlayers.size() < 100) {
-				int index = random.nextInt(1000);
-				if (hasBeenSelected.contains(index)) {
-					continue;
-				}
-				hasBeenSelected.add(index);
-				tournamentPlayers.add(populationListWithScores.get(index));
-			}
-
-			ArrayList<Tuple<Heuristic, Integer>> bestTwo = getBestTwo(tournamentPlayers);
-
-			Heuristic child;
-			if (Constants.USE_WEIGHTED_REPRODUCE) {
-				child = weightedReproduce(bestTwo.get(0), bestTwo.get(1));
-
-			} else {
-				child = reproduce(bestTwo.get(0), bestTwo.get(1));
-			}
-
-			children.add(child);
-			tournamentPlayers.clear();
-			hasBeenSelected.clear();
+		// Mutate every baby
+		for (int i = 0; i < chlidren.size(); i++) {
+			chlidren.set(i, mutate(chlidren.get(i)));
 		}
 
-		for (Heuristic child : children) {
-			// Mutate child
-			child = mutate(child);
-		}
-
-		populationListWithScores.sort(Comparator.comparing((Tuple<Heuristic, Integer> tuple) -> tuple.getSecond()).reversed());
-		for (int i = 0; i < 700; i++) {
-			children.add(populationListWithScores.get(i).getFirst());
-		}
-
-		return children;
+		return chlidren;
 	}
 
-	public static ArrayList<Tuple<Heuristic, Integer>> getBestTwo(ArrayList<Tuple<Heuristic, Integer>> tournamentPlayers) {
+
+	public static Heuristic makeBaby(HashMap<Heuristic, Integer> populationWithScores) {
+		ArrayList<Heuristic> sortedOldGeneration = getSortedPopulation(populationWithScores);
+
+		Heuristic mother = sortedOldGeneration.get(new Random().nextInt(Constants.NUMBER_OF_HEURISTICS));
+		Heuristic father = sortedOldGeneration.get(new Random().nextInt(Constants.NUMBER_OF_HEURISTICS));
+
+		if (Constants.USE_WEIGHTED_REPRODUCE) {
+			return weightedReproduce(new Tuple(mother, populationWithScores.get(mother)) , new Tuple(father, populationWithScores.get(father)));
+
+		} else {
+			return reproduce(new Tuple(mother, populationWithScores.get(mother)) , new Tuple(father, populationWithScores.get(father)));
+		}
+	}
+
+
+
+		public static ArrayList<Tuple<Heuristic, Integer>> getBestTwo(ArrayList<Tuple<Heuristic, Integer>> tournamentPlayers) {
 		Tuple<Heuristic, Integer> theBest = tournamentPlayers.get(0);
 		Tuple<Heuristic, Integer> theSecondBest = tournamentPlayers.get(1);
 

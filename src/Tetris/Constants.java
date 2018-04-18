@@ -13,6 +13,7 @@ public final class Constants {
     public final static boolean ALLOW_MASTURBATION_REPRODUCTION = false;
     public final static boolean RETAIN_PARENTS = true;
     public final static double FRACTION_OF_RETAINED_PARENTS = 0.3;
+    public final static double PERCENTAGE_OF_POPULATION_RETAINED = 0.70;
     public final static boolean REPRODUCE_PROPORTIONATELY = false;
     public final static boolean USE_WEIGHTED_REPRODUCE = true;
     public final static boolean USE_ZERO_INITIAL_POPULATON = false;
