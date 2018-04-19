@@ -14,6 +14,9 @@ public class MaxHeightFeature extends Feature {
             max = Math.max(max, tops[i]);
         }
 
+        if (max >= 20) {
+            return Double.MAX_VALUE;
+        }
         return max;
     }
 

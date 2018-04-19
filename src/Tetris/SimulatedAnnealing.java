@@ -1,26 +1,34 @@
 package Tetris;
 
 import Tetris.Helper.Helper;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 public class SimulatedAnnealing {
 
     private double score;
+    private double bestAverage;
     private int iteration;
     private Random random;
+    private BufferedWriter bw;
 
-    public SimulatedAnnealing() {
+    public SimulatedAnnealing() throws IOException {
         score = 0;
+        bestAverage = 0;
         iteration = 0;
         random = new Random();
+        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
     }
 
-    public void run() {
+    public void run() throws IOException {
         score = PlayerSkeleton.runGameWithHeuristic(getHeuristic());
         System.out.println(score);
     }
 
-    public Heuristic getHeuristic() {
+    public Heuristic getHeuristic() throws IOException {
         double initialTemperature = calculateInitialTemperature();
         double temperature = initialTemperature;
         Heuristic heuristic  = new Heuristic(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1);
@@ -31,8 +39,8 @@ public class SimulatedAnnealing {
             }
 
             Heuristic newHeuristic = getNeighbourHeuristic(heuristic);
-            double averageScoreWithOldHeuristic = getAverageScore(heuristic, 5);
-            double averageScoreWithNewHeuristic = getAverageScore(newHeuristic, 5);
+            double averageScoreWithOldHeuristic = getAverageScore(heuristic, 10);
+            double averageScoreWithNewHeuristic = getAverageScore(newHeuristic, 10);
             double improvementFromOlderHeuristic = averageScoreWithNewHeuristic - averageScoreWithOldHeuristic;
             if (isAccepted(temperature, improvementFromOlderHeuristic)) {
                 heuristic = newHeuristic;
@@ -56,6 +64,7 @@ public class SimulatedAnnealing {
         int index = random.nextInt(Constants.NUMBER_OF_FEATURES);
 
         newHeuristic.weights[index] = newHeuristic.weights[index] * (1 + valueChange);
+        newHeuristic.weights[index] = Math.max(0, newHeuristic.weights[index]);
 
         return new Heuristic(newHeuristic.weights);
     }
@@ -82,12 +91,21 @@ public class SimulatedAnnealing {
         return newTemperature;
     }
 
-    public double getAverageScore(Heuristic heuristic, int rounds) {
+    public double getAverageScore(Heuristic heuristic, int rounds) throws IOException {
         double sum = 0;
         for (int i = 0; i < rounds; i++) {
             sum += PlayerSkeleton.runGameWithHeuristic(heuristic);
         }
         System.out.println("Score: " + sum / rounds);
+        if (sum / rounds > bestAverage) {
+            bestAverage = sum / rounds;
+            System.out.println("New best average score: " + bestAverage);
+            bw.write("Best average: " + bestAverage);
+            bw.newLine();
+            bw.write(heuristic.toString());
+            bw.newLine();
+            bw.flush();
+        }
         return sum / rounds;
     }
 }
