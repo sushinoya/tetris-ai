@@ -14,7 +14,7 @@ public class MaxHeightFeature extends Feature {
             max = Math.max(max, tops[i]);
         }
 
-        if (max >= 20) {
+        if (state.hasLost()) {
             return Double.MAX_VALUE;
         }
         return max;

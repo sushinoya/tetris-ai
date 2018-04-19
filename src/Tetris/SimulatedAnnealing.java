@@ -31,7 +31,7 @@ public class SimulatedAnnealing {
     public Heuristic getHeuristic() throws IOException {
         double initialTemperature = calculateInitialTemperature();
         double temperature = initialTemperature;
-        Heuristic heuristic  = new Heuristic(7.0E-8, 0.09554621, 0.44067339, 0.05310036, 0.0, 0.0, 0.89027093, 1.8159E-4, 0.03571075, 7.899E-4);
+        Heuristic heuristic  = new Heuristic(8.0E-8, 0.16230987, 0.74859734, 0.09020465, 0.0, 0.0, 0.63359186, 3.0848E-4, 0.06066391, 0.00134185);
         while (true) {
             if (temperature < 1) {
                 System.out.println("Cooled down! The result is obtained.");
