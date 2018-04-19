@@ -20,7 +20,7 @@ public class SimulatedAnnealing {
         bestAverage = 0;
         iteration = 0;
         random = new Random();
-        //bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
+        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
     }
 
     public void run() throws IOException {
@@ -100,11 +100,11 @@ public class SimulatedAnnealing {
         if (sum / rounds > bestAverage) {
             bestAverage = sum / rounds;
             System.out.println("New best average score: " + bestAverage);
-            //bw.write("Best average: " + bestAverage);
-            //bw.newLine();
-            //bw.write(heuristic.toString());
-            //bw.newLine();
-            //bw.flush();
+            bw.write("Best average: " + bestAverage);
+            bw.newLine();
+            bw.write(heuristic.toString());
+            bw.newLine();
+            bw.flush();
         }
         return sum / rounds;
     }
