@@ -20,7 +20,7 @@ public class SimulatedAnnealing {
         bestAverage = 0;
         iteration = 0;
         random = new Random();
-        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
+        //bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
     }
 
     public void run() throws IOException {
@@ -31,7 +31,7 @@ public class SimulatedAnnealing {
     public Heuristic getHeuristic() throws IOException {
         double initialTemperature = calculateInitialTemperature();
         double temperature = initialTemperature;
-        Heuristic heuristic  = new Heuristic(0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1);
+        Heuristic heuristic  = new Heuristic(7.0E-8, 0.09554621, 0.44067339, 0.05310036, 0.0, 0.0, 0.89027093, 1.8159E-4, 0.03571075, 7.899E-4);
         while (true) {
             if (temperature < 1) {
                 System.out.println("Cooled down! The result is obtained.");
@@ -100,11 +100,11 @@ public class SimulatedAnnealing {
         if (sum / rounds > bestAverage) {
             bestAverage = sum / rounds;
             System.out.println("New best average score: " + bestAverage);
-            bw.write("Best average: " + bestAverage);
-            bw.newLine();
-            bw.write(heuristic.toString());
-            bw.newLine();
-            bw.flush();
+            //bw.write("Best average: " + bestAverage);
+            //bw.newLine();
+            //bw.write(heuristic.toString());
+            //bw.newLine();
+            //bw.flush();
         }
         return sum / rounds;
     }
