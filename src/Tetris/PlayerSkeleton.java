@@ -11,7 +11,8 @@ import Tetris.Helper.Helper;
 public class PlayerSkeleton {
 
     public static double bestScore;
-	public static double bestAvgScoreOfHeuristic;
+    // Best average score array for thread access
+	public static volatile double[] bestAvgScoreOfHeuristic = new double[1];
     public static Heuristic bestHeuristic;
 	private static BufferedWriter bw;
 	public static TFrame frame;
@@ -205,38 +206,32 @@ public class PlayerSkeleton {
 
 		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
 
-		// Array access for threads
-		double[] bestAverageScore = new double[1];
-
         for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
             final int threadGroup = i;
-            Thread newThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for (int individual = 0; individual < (population.size() / Constants.NUMBER_OF_THREADS); individual++) {
-                        // Get index of heuristic
-                        int indexOfIndividual = threadGroup * (population.size() / Constants.NUMBER_OF_THREADS) + individual;
+            Thread newThread = new Thread(() -> {
+                for (int individual = 0; individual < (population.size() / Constants.NUMBER_OF_THREADS); individual++) {
+                    // Get index of heuristic
+                    int indexOfIndividual = threadGroup * (population.size() / Constants.NUMBER_OF_THREADS) + individual;
 
-                        // Average and Max scores
-                        int maxScore = 0;
-                        double[] scores = new double[Constants.NUMBER_OF_GAMES];
+                    // Average and Max scores
+                    int maxScore = 0;
+                    double[] scores = new double[Constants.NUMBER_OF_GAMES];
 
-                        Heuristic individualHeuristic = population.get(indexOfIndividual);
+                    Heuristic individualHeuristic = population.get(indexOfIndividual);
 
-                        for (int round = 0; round < Constants.NUMBER_OF_GAMES; round++) {
-                            int scoreForRound = runGameWithHeuristic(individualHeuristic);
-                            maxScore = Math.max(scoreForRound, maxScore);
-                            scores[round] = scoreForRound;
-                        }
-
-                        double averageScore = Helper.sum(scores) / Constants.NUMBER_OF_GAMES;
-                        if (averageScore > bestAverageScore[0]) {
-                            System.out.println("New Best Average score: " + averageScore + " Weights: "
-                                    + individualHeuristic + " with S.D. of " + Helper.round(Helper.calculateSD(scores), 2));
-                            bestAverageScore[0] = averageScore;
-                        }
-                        averageScores.put(individualHeuristic, maxScore);
+                    for (int round = 0; round < Constants.NUMBER_OF_GAMES; round++) {
+                        int scoreForRound = runGameWithHeuristic(individualHeuristic);
+                        maxScore = Math.max(scoreForRound, maxScore);
+                        scores[round] = scoreForRound;
                     }
+
+                    double averageScore = Helper.sum(scores) / Constants.NUMBER_OF_GAMES;
+                    if (averageScore > bestAvgScoreOfHeuristic[0]) {
+						bestAvgScoreOfHeuristic[0] = averageScore;
+                        System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic[0] + " Weights: "
+                                + individualHeuristic + " with S.D. of " + Helper.round(Helper.calculateSD(scores), 2));
+                    }
+                    averageScores.put(individualHeuristic, maxScore);
                 }
             });
             newThread.start();

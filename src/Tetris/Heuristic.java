@@ -43,7 +43,7 @@ public class Heuristic implements Serializable{
 
         StringBuilder sb = new StringBuilder("(");
         for (double weight:  this.weights) {
-            sb.append(Helper.round(weight, 2) + ", ");
+            sb.append(Helper.round(weight, 8) + ", ");
         }
 
         String separatedByCommas = sb.toString();

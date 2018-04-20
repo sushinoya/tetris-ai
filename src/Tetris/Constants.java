@@ -2,7 +2,7 @@ package Tetris;
 
 public final class Constants {
 
-    public final static int NUMBER_OF_THREADS = 1; // Make sure number of threads is a factor of the number of heuristics
+    public final static int NUMBER_OF_THREADS = 4; // Make sure number of threads is a factor of the number of heuristics
     public final static int NUMBER_OF_GAMES = 5;
     public final static int NUMBER_OF_HEURISTICS = 100;
     public final static int SUM_OF_PROBABILITIES = 100;
