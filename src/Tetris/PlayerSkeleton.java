@@ -200,7 +200,10 @@ public class PlayerSkeleton {
 
 
 	public static HashMap<Heuristic, Integer> getPopulationScores(ArrayList<Heuristic> population) {
-	    HashMap<Heuristic, Integer> maxScores = new HashMap<>();
+
+		long startTime = System.nanoTime();
+
+		HashMap<Heuristic, Integer> maxScores = new HashMap<>();
 		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
 		if (Constants.THREADS_RUNNING) {
 			for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
@@ -271,6 +274,10 @@ public class PlayerSkeleton {
     			flushBuffer();
     		}
 		}
+
+		// Print out time elapsed in seconds
+		long estimatedTime = System.nanoTime() - startTime;
+		System.out.println(String.format("\nTime taken for generation: %d seconds", estimatedTime/Math.pow(10, 9)));
 
 		return averageScores;
 	}
