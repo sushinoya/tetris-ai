@@ -4,10 +4,6 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 
-import com.sun.tools.doclets.internal.toolkit.builders.ConstantsSummaryBuilder;
-import com.sun.tools.internal.jxc.ap.Const;
-import com.sun.tools.javac.code.Attribute;
-
 import Tetris.Helper.Tuple;
 import Tetris.Helper.Helper;
 
@@ -205,6 +201,7 @@ public class PlayerSkeleton {
 
 		HashMap<Heuristic, Integer> maxScores = new HashMap<>();
 		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
+
 		if (Constants.THREADS_RUNNING) {
 			for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
 				final int threadGroup = i;
@@ -243,7 +240,6 @@ public class PlayerSkeleton {
 					System.out.println("Error joining thread");
 				}
 			}
-
 		} else {
     		// Run every heuristic NUMBER_OF_GAMES times and store the average score
     		for (Heuristic heuristic : population) {
@@ -277,7 +273,7 @@ public class PlayerSkeleton {
 
 		// Print out time elapsed in seconds
 		long estimatedTime = System.nanoTime() - startTime;
-		System.out.println(String.format("\nTime taken for generation: %d seconds", estimatedTime/Math.pow(10, 9)));
+		System.out.println(String.format("\nTime taken for generation: %.8f seconds", estimatedTime/Math.pow(10, 9)));
 
 		return averageScores;
 	}
