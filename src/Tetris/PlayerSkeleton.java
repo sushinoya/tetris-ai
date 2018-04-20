@@ -4,6 +4,10 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 
+import com.sun.tools.doclets.internal.toolkit.builders.ConstantsSummaryBuilder;
+import com.sun.tools.internal.jxc.ap.Const;
+import com.sun.tools.javac.code.Attribute;
+
 import Tetris.Helper.Tuple;
 import Tetris.Helper.Helper;
 
@@ -197,11 +201,40 @@ public class PlayerSkeleton {
 
 	public static HashMap<Heuristic, Integer> getPopulationScores(ArrayList<Heuristic> population) {
 		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
+		// For saving scores from each thread
+		double[] populationScores = new double[Constants.NUMBER_OF_THREADS];
+
+		for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
+		    final int threadGroup = i;
+			Thread newThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					for (int individual = 0; individual < (population.size() / Constants.NUMBER_OF_THREADS); individual++) {
+					    // Get heuristic
+						int indexOfIndividual = threadGroup * (population.size() / Constants.NUMBER_OF_THREADS) + individual;
+						Heuristic individualHeuristic = population.get(indexOfIndividual);
+						double[] scoresForIndividual = new double[Constants.NUMBER_OF_GAMES];
+						for (int round = 0; round < Constants.NUMBER_OF_GAMES; round++) {
+							int scoreForRound = runGameWithHeuristic(individualHeuristic);
+							scoresForIndividual[round] = scoreForRound;
+						}
+						System.out.println("Average score for individual: " + Helper.sum(scoresForIndividual) / Constants.NUMBER_OF_GAMES);
+					}
+				}
+			});
+			newThread.start();
+			try {
+				newThread.join();
+			} catch (Exception e) {
+				System.out.println("Error joining thread");
+			}
+		}
 
 		// Run every heuristic NUMBER_OF_GAMES times and store the average score
 		for (Heuristic heuristic : population) {
 			Integer averageScore = 0;
             int scoreForOneRound = 0;
+
 			double[] scores = new double[Constants.NUMBER_OF_GAMES];
 
 			for (int i = 0; i < Constants.NUMBER_OF_GAMES; i++) {

@@ -2,8 +2,9 @@ package Tetris;
 
 public final class Constants {
 
+    public final static int NUMBER_OF_THREADS = 4;
     public final static int NUMBER_OF_GAMES = 5;
-    public final static int NUMBER_OF_HEURISTICS = 500;
+    public final static int NUMBER_OF_HEURISTICS = 100;
     public final static int SUM_OF_PROBABILITIES = 100;
     public final static int NUMBER_OF_GENERATIONS = 100;
     public final static double PROBABILITY_OF_MUTATION = 0.05;
