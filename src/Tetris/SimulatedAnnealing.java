@@ -31,7 +31,7 @@ public class SimulatedAnnealing {
     public Heuristic getHeuristic() throws IOException {
         double initialTemperature = calculateInitialTemperature();
         double temperature = initialTemperature;
-        Heuristic heuristic  = new Heuristic(8.0E-8, 0.16230987, 0.74859734, 0.09020465, 0.0, 0.0, 0.63359186, 3.0848E-4, 0.06066391, 0.00134185);
+        Heuristic heuristic  = new Heuristic(0.03, 0.75, 0.09, 0.000000001, 0.0000001, 0.65, 3.0848E-4, 0.06, 0.00000001);
         while (true) {
             if (temperature < 1) {
                 System.out.println("Cooled down! The result is obtained.");
@@ -54,7 +54,7 @@ public class SimulatedAnnealing {
     }
 
     public double calculateInitialTemperature() {
-        return 500;
+        return 50000;
     }
 
     public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
@@ -65,6 +65,7 @@ public class SimulatedAnnealing {
 
         newHeuristic.weights[index] = newHeuristic.weights[index] * (1 + valueChange);
         newHeuristic.weights[index] = Math.max(0, newHeuristic.weights[index]);
+        newHeuristic.weights[index] = Math.min(1, newHeuristic.weights[index]);
 
         return new Heuristic(newHeuristic.weights);
     }
