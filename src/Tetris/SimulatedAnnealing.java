@@ -47,8 +47,6 @@ public class SimulatedAnnealing {
             }
 
             temperature = scheduleNewTemperature(initialTemperature, iteration);
-            System.out.println(temperature);
-            System.out.println(heuristic);
             iteration++;
         }
     }
@@ -73,7 +71,6 @@ public class SimulatedAnnealing {
     public boolean isAccepted(double temperature, double improvementFromOlderHeuristic) {
         double acceptanceProbability = getAcceptanceProbability(temperature, improvementFromOlderHeuristic);
         if (acceptanceProbability >= random.nextDouble()) {
-            System.out.println("This is called");
             return true;
         }
         return false;
@@ -97,10 +94,9 @@ public class SimulatedAnnealing {
         for (int i = 0; i < rounds; i++) {
             sum += PlayerSkeleton.runGameWithHeuristic(heuristic);
         }
-        System.out.println("Score: " + sum / rounds);
         if (sum / rounds > bestAverage) {
             bestAverage = sum / rounds;
-            System.out.println("New best average score: " + bestAverage);
+            System.out.println("New best average score: " + bestAverage + " Weights: " + heuristic);
             bw.write("Best average: " + bestAverage);
             bw.newLine();
             bw.write(heuristic.toString());
