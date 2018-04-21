@@ -20,7 +20,7 @@ public class SimulatedAnnealing {
         bestAverage = 0;
         iteration = 0;
         random = new Random();
-        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
+        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt", true));
     }
 
     public void run() throws IOException {
