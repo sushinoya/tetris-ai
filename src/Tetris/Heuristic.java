@@ -18,7 +18,7 @@ public class Heuristic implements Serializable{
         new NumOfRowsCleared(),
         new NumOfBlocksAboveHolesFeature(),
         new SumOfDepthOfHoles(),
-        new NumOfWells(),
+        new NumberOfWellBlocks(),
         new AggregateHeightFeature()
     };
 
