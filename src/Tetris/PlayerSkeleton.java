@@ -11,7 +11,8 @@ import Tetris.Helper.Helper;
 public class PlayerSkeleton {
 
     public static double bestScore;
-	public static double bestAvgScoreOfHeuristic;
+    // Best average score array for thread access
+	public static volatile double[] bestAvgScoreOfHeuristic = new double[1];
     public static Heuristic bestHeuristic;
 	private static BufferedWriter bw;
 	public static TFrame frame;
@@ -114,15 +115,21 @@ public class PlayerSkeleton {
 
 		ArrayList<Heuristic> population = getHeuristicsForGeneticFunction();
 
+		System.out.println(String.format("Running genetic function with %d thread(s)", Constants.NUMBER_OF_THREADS));
+
 		for (int i = 0; i < Constants.NUMBER_OF_GENERATIONS; i++) {
             System.out.println("\nCollecting score for generation " + gen + "..." );
+			long startTime = System.nanoTime();
 
             HashMap<Heuristic, Integer> populationWithAverageScores = getPopulationScores(population);
 			ObjectOutputStream objectOutputStream = openObjOutputStream();
-            System.out.println("Done collecting for generation " + gen + ".\n" );
+
+			System.out.println("Done collecting for generation " + gen + ".\n" );
+			// Print out time elapsed in seconds
+			long estimatedTime = System.nanoTime() - startTime;
+			System.out.println(String.format("\nTime taken for generation %d: %.8f seconds", gen, estimatedTime/Math.pow(10, 9)));
 
 			double populationAverage = Helper.sum(populationWithAverageScores.values()) / Constants.NUMBER_OF_HEURISTICS;
-
             System.out.println("Generation " + gen + " Average Score: " + populationAverage);
             gen++;
 
@@ -201,34 +208,50 @@ public class PlayerSkeleton {
 
 
 	public static HashMap<Heuristic, Integer> getPopulationScores(ArrayList<Heuristic> population) {
+
+		ArrayList<Thread> threads = new ArrayList<Thread>();
 		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
 
-		// Run every heuristic NUMBER_OF_GAMES times and store the average score
-		for (Heuristic heuristic : population) {
-			Integer averageScore = 0;
-            int scoreForOneRound = 0;
-			double[] scores = new double[Constants.NUMBER_OF_GAMES];
+        for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
+            final int threadGroup = i;
+            Thread newThread = new Thread(() -> {
+                for (int individual = 0; individual < (population.size() / Constants.NUMBER_OF_THREADS); individual++) {
+                    // Get index of heuristic
+                    int indexOfIndividual = threadGroup * (population.size() / Constants.NUMBER_OF_THREADS) + individual;
 
-			for (int i = 0; i < Constants.NUMBER_OF_GAMES; i++) {
-                scoreForOneRound = runGameWithHeuristic(heuristic);
-			    averageScore += scoreForOneRound;
-				scores[i] = scoreForOneRound;
+                    // Average and Max scores
+                    int maxScore = 0;
+                    double[] scores = new double[Constants.NUMBER_OF_GAMES];
+
+                    Heuristic individualHeuristic = population.get(indexOfIndividual);
+
+                    for (int round = 0; round < Constants.NUMBER_OF_GAMES; round++) {
+                        int scoreForRound = runGameWithHeuristic(individualHeuristic);
+                        maxScore = Math.max(scoreForRound, maxScore);
+                        scores[round] = scoreForRound;
+                    }
+
+                    double averageScore = Helper.sum(scores) / Constants.NUMBER_OF_GAMES;
+                    if (averageScore > bestAvgScoreOfHeuristic[0]) {
+						bestAvgScoreOfHeuristic[0] = averageScore;
+                        System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic[0] + " Weights: "
+                                + individualHeuristic + " with S.D. of " + Helper.round(Helper.calculateSD(scores), 2));
+                    }
+                    averageScores.put(individualHeuristic, maxScore);
+                }
+            });
+            newThread.start();
+            threads.add(newThread);
+        }
+
+       	for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
+            Thread currentThread = threads.get(i);
+			try {
+				currentThread.join();
+			} catch (Exception e) {
+				System.out.println("Error joining thread");
 			}
 
-			averageScore /= Constants.NUMBER_OF_GAMES;
-
-			if (averageScore > bestAvgScoreOfHeuristic) {
-				bestAvgScoreOfHeuristic = averageScore;
-				System.out.println("New Best Average score: " + bestAvgScoreOfHeuristic + " Weights: "
-                       + heuristic + " with S.D. of " + Helper.round(Helper.calculateSD(scores), 2));
-			}
-
-			if(averageScore > 1000) {
-				writeBuffer(heuristic, averageScore, Helper.calculateSD(scores));
-			}
-			averageScores.put(heuristic, averageScore);
-
-			flushBuffer();
 		}
 
 		return averageScores;
