@@ -204,6 +204,7 @@ public class PlayerSkeleton {
 
 	public static HashMap<Heuristic, Integer> getPopulationScores(ArrayList<Heuristic> population) {
 
+		ArrayList<Thread> threads = new ArrayList<Thread>();
 		HashMap<Heuristic, Integer> averageScores = new HashMap<>();
 
         for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
@@ -235,12 +236,18 @@ public class PlayerSkeleton {
                 }
             });
             newThread.start();
-            try {
-                newThread.join();
-            } catch (Exception e) {
-                System.out.println("Error joining thread");
-            }
+            threads.add(newThread);
         }
+
+       	for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
+            Thread currentThread = threads.get(i);
+			try {
+				currentThread.join();
+			} catch (Exception e) {
+				System.out.println("Error joining thread");
+			}
+
+		}
 
 		return averageScores;
 	}
