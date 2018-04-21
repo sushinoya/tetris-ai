@@ -14,13 +14,15 @@ public class SimulatedAnnealing {
     private int iteration;
     private Random random;
     private BufferedWriter bw;
+    private final int threadNumber;
 
-    public SimulatedAnnealing() throws IOException {
+    public SimulatedAnnealing(int threadNum) throws IOException {
+        threadNumber = threadNum;
         score = 0;
         bestAverage = 0;
         iteration = 0;
         random = new Random();
-        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
+        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt", true));
     }
 
     public void run() throws IOException {
@@ -34,7 +36,9 @@ public class SimulatedAnnealing {
         Heuristic heuristic  = new Heuristic(0.03, 0.75, 0.09, 0.000000001, 0.0000001, 0.65, 3.0848E-4, 0.06, 0.00000001);
         while (true) {
             if (temperature < 1) {
-                System.out.println("Cooled down! The result is obtained.");
+                System.out.println("Coolios~ Impending ICE AGE for thread " + threadNumber);
+                System.out.println("Best average for SA thread " + threadNumber + ": " + bestAverage);
+                System.out.println("Heuristic returned for SA thread " + threadNumber + ": " + heuristic);
                 return heuristic;
             }
 
@@ -47,14 +51,12 @@ public class SimulatedAnnealing {
             }
 
             temperature = scheduleNewTemperature(initialTemperature, iteration);
-            System.out.println(temperature);
-            System.out.println(heuristic);
             iteration++;
         }
     }
 
     public double calculateInitialTemperature() {
-        return 50000;
+        return 2;
     }
 
     public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
@@ -73,7 +75,6 @@ public class SimulatedAnnealing {
     public boolean isAccepted(double temperature, double improvementFromOlderHeuristic) {
         double acceptanceProbability = getAcceptanceProbability(temperature, improvementFromOlderHeuristic);
         if (acceptanceProbability >= random.nextDouble()) {
-            System.out.println("This is called");
             return true;
         }
         return false;
@@ -97,10 +98,9 @@ public class SimulatedAnnealing {
         for (int i = 0; i < rounds; i++) {
             sum += PlayerSkeleton.runGameWithHeuristic(heuristic);
         }
-        System.out.println("Score: " + sum / rounds);
         if (sum / rounds > bestAverage) {
             bestAverage = sum / rounds;
-            System.out.println("New best average score: " + bestAverage);
+            System.out.println("New best average score: " + bestAverage + " Weights: " + heuristic);
             bw.write("Best average: " + bestAverage);
             bw.newLine();
             bw.write(heuristic.toString());
