@@ -10,7 +10,6 @@ public class Heuristic implements Serializable{
 
     double[] weights;
     public static Feature[] features = {
-        new AverageHeightFeature(),
         new MaxHeightFeature(),
         new NumOfHolesFeature(),
         new UnevennessFeature(),

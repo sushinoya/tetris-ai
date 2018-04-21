@@ -21,22 +21,28 @@ public class PlayerSkeleton {
 	//implement this function to have a working system
 	public int pickMove(State s, int[][] legalMoves, Heuristic heuristic) {
 
-        double bestHeuristicValue = Integer.MAX_VALUE; // Minimize value
+        double bestHeuristicValue = Double.MAX_VALUE; // Minimize value
         int bestMove = 0; // Default to first move
+		ArrayList<Integer> bestMoves = new ArrayList();
 
         // Pick best move out of possible moves
         for (int i = 0; i < legalMoves.length; i++) {
             PotentialNextState nextState = new PotentialNextState(s);
             nextState.makeMove(legalMoves[i]);
-            if (nextState.hasLost()) {
-            	continue;
-			}
             double currentHeuristicValue = heuristic.getValue(nextState);
             if (currentHeuristicValue < bestHeuristicValue) {
-                bestMove = i;
-            }
+                bestMoves.clear();
+            	bestMove = i;
+            	bestMoves.add(bestMove);
+            } else if (currentHeuristicValue == bestHeuristicValue) {
+            	bestMoves.add(i);
+			}
             bestHeuristicValue = Math.min(bestHeuristicValue, currentHeuristicValue);
         }
+        if (bestMoves.size() > 1) {
+			int index = new Random().nextInt(bestMoves.size());
+			bestMove = bestMoves.get(index);
+		}
 
         return bestMove;
 	}
@@ -181,7 +187,6 @@ public class PlayerSkeleton {
 
 		return newPopulation;
 	}
-
 
 	public static Heuristic mutate(Heuristic heuristic) {
 

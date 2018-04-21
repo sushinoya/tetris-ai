@@ -1,29 +1,37 @@
 package Tetris;
 
 import Tetris.Helper.Helper;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 public class SimulatedAnnealing {
 
     private double score;
+    private double bestAverage;
     private int iteration;
     private Random random;
+    private BufferedWriter bw;
 
-    public SimulatedAnnealing() {
+    public SimulatedAnnealing() throws IOException {
         score = 0;
+        bestAverage = 0;
         iteration = 0;
         random = new Random();
+        bw = new BufferedWriter(new FileWriter("good_Heuristics.txt"));
     }
 
-    public void run() {
+    public void run() throws IOException {
         score = PlayerSkeleton.runGameWithHeuristic(getHeuristic());
         System.out.println(score);
     }
 
-    public Heuristic getHeuristic() {
+    public Heuristic getHeuristic() throws IOException {
         double initialTemperature = calculateInitialTemperature();
         double temperature = initialTemperature;
-        Heuristic heuristic  = new Heuristic(8.15, 2.31, 50.41, 11.44, 30.79);
+        Heuristic heuristic  = new Heuristic(0.03, 0.75, 0.09, 0.000000001, 0.0000001, 0.65, 3.0848E-4, 0.06, 0.00000001);
         while (true) {
             if (temperature < 1) {
                 System.out.println("Cooled down! The result is obtained.");
@@ -31,8 +39,8 @@ public class SimulatedAnnealing {
             }
 
             Heuristic newHeuristic = getNeighbourHeuristic(heuristic);
-            double averageScoreWithOldHeuristic = getAverageScore(heuristic, 5);
-            double averageScoreWithNewHeuristic = getAverageScore(newHeuristic, 5);
+            double averageScoreWithOldHeuristic = getAverageScore(heuristic, 10);
+            double averageScoreWithNewHeuristic = getAverageScore(newHeuristic, 10);
             double improvementFromOlderHeuristic = averageScoreWithNewHeuristic - averageScoreWithOldHeuristic;
             if (isAccepted(temperature, improvementFromOlderHeuristic)) {
                 heuristic = newHeuristic;
@@ -46,23 +54,20 @@ public class SimulatedAnnealing {
     }
 
     public double calculateInitialTemperature() {
-        return 500;
+        return 50000;
     }
 
     public Heuristic getNeighbourHeuristic(Heuristic heuristic) {
         Heuristic newHeuristic = new Heuristic(heuristic.weights);
-        double valueChange = random.nextDouble() * 5;
-        double sum = Helper.sum(heuristic.weights) + valueChange;
+        double valueChange = random.nextDouble() * 2 - 1;
         // The index indicates which weight is changed
-        int index = random.nextInt(5);
+        int index = random.nextInt(Constants.NUMBER_OF_FEATURES);
 
-        newHeuristic.weights[index] += valueChange;
+        newHeuristic.weights[index] = newHeuristic.weights[index] * (1 + valueChange);
+        newHeuristic.weights[index] = Math.max(0, newHeuristic.weights[index]);
+        newHeuristic.weights[index] = Math.min(1, newHeuristic.weights[index]);
 
-        for (int i = 0; i < Constants.NUMBER_OF_FEATURES; i++) {
-            newHeuristic.weights[i] = newHeuristic.weights[i] * 100 / sum;
-        }
-
-        return newHeuristic;
+        return new Heuristic(newHeuristic.weights);
     }
 
     public boolean isAccepted(double temperature, double improvementFromOlderHeuristic) {
@@ -87,12 +92,21 @@ public class SimulatedAnnealing {
         return newTemperature;
     }
 
-    public double getAverageScore(Heuristic heuristic, int rounds) {
+    public double getAverageScore(Heuristic heuristic, int rounds) throws IOException {
         double sum = 0;
         for (int i = 0; i < rounds; i++) {
             sum += PlayerSkeleton.runGameWithHeuristic(heuristic);
         }
         System.out.println("Score: " + sum / rounds);
+        if (sum / rounds > bestAverage) {
+            bestAverage = sum / rounds;
+            System.out.println("New best average score: " + bestAverage);
+            bw.write("Best average: " + bestAverage);
+            bw.newLine();
+            bw.write(heuristic.toString());
+            bw.newLine();
+            bw.flush();
+        }
         return sum / rounds;
     }
 }
