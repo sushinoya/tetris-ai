@@ -57,8 +57,29 @@ public class PlayerSkeleton {
 		if (Constants.IS_GENETIC_RUNNING == true) {
 			geneticFunction();
 		} else {
-			SimulatedAnnealing sa = new SimulatedAnnealing();
-			sa.run();
+			ArrayList<Thread> threadList = new ArrayList<Thread>();
+
+			for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
+				Thread saThread = new Thread(() -> {
+				    try {
+						SimulatedAnnealing sa = new SimulatedAnnealing();
+						sa.run();
+					} catch (Exception e) {
+						System.out.println("Error running SA thread");
+					}
+				});
+				threadList.add(saThread);
+				saThread.start();
+			}
+
+			for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
+				try {
+					threadList.get(i).join();
+					System.out.println("COOLIOS~ Impending ICE AGE for thread " + i);
+				} catch (Exception e) {
+					System.out.println("Error joining thread");
+				}
+			}
 		}
 
 	}
