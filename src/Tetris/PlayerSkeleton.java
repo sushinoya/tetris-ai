@@ -60,9 +60,10 @@ public class PlayerSkeleton {
 			ArrayList<Thread> threadList = new ArrayList<Thread>();
 
 			for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
+				final int threadNumber = i;
 				Thread saThread = new Thread(() -> {
 				    try {
-						SimulatedAnnealing sa = new SimulatedAnnealing();
+						SimulatedAnnealing sa = new SimulatedAnnealing(threadNumber);
 						sa.run();
 					} catch (Exception e) {
 						System.out.println("Error running SA thread");
@@ -75,7 +76,6 @@ public class PlayerSkeleton {
 			for (int i = 0; i < Constants.NUMBER_OF_THREADS; i++) {
 				try {
 					threadList.get(i).join();
-					System.out.println("COOLIOS~ Impending ICE AGE for thread " + i);
 				} catch (Exception e) {
 					System.out.println("Error joining thread");
 				}
