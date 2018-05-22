@@ -19,3 +19,10 @@ Many features were considered when making this AI and the following were tried a
 
 
 The final weights obtained in the test runs that we conducted cleared over 4 million lines, with an average of approximately 500,000.
+
+## CONTRIBUTORS
+- Suyash Shekhar([@sushinoya](www.github.com/sushinoya))
+- Lu Lechuan([@LuLechuan](www.github.com/LuLechuan))
+- Pan Haozhe([@Haozhe321](www.github.com/Haozhe321))
+- Shi Tian([@shitian007](www.github.com/shitian007))
+- Kaiser Tan([@kaisertanqr](www.github.com/kaisertanqr))
